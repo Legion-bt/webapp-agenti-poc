@@ -66,6 +66,9 @@ al posto dello store locale.
   `003` (dati demo), `004` (profiles.agent_id). Edge Function `admin-users`
   (`supabase/functions/admin-users`, gestione utenti con la chiave segreta lato server) pubblicata
   dal dashboard (Via Editor, Verify JWT disattivato): dopo ogni modifica va ripubblicata a mano.
+- `005` (ordini: order_items, RPC `create_order`, numerazione lato server): ordini letti e scritti
+  su Supabase da `order.service.ts` / `store.syncOrders()`. Provvigioni, giacenze, preventivi e
+  visite restano dati demo locali.
   La Edge Function è esclusa dal `tsc` del progetto (è codice Deno).
 - Regole per lo schema (stesse di ShiftOps): ogni nuova tabella in `public` con GRANT espliciti,
   RLS abilitata e policy separate per select/insert/update/delete; ruoli in tabella dedicata,

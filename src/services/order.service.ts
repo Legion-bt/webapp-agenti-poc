@@ -1,6 +1,7 @@
 import { store } from '../lib/store';
 import { Order, OrderStatus } from '../types';
 import { erpGateway } from './erp-gateway';
+import { supabase } from '../lib/supabase/client';
 
 export class OrderService {
   public getOrders(filters?: {
@@ -53,6 +54,10 @@ export class OrderService {
     return store.getState().orders.find((o) => o.id === id);
   }
 
+  /**
+   * Prices each line with the ERP gateway, checks the customer's credit and saves the
+   * order on Supabase (create_order: number, totals and visibility decided server-side).
+   */
   public async createOrder(orderInput: {
     customerId: string;
     requestedDeliveryDate: string;
@@ -63,177 +68,113 @@ export class OrderService {
       quantity: number;
     }>;
   }): Promise<{ order: Order; isBlocked: boolean; warnings: string[] }> {
+    if (!supabase) throw new Error('Servizio ordini non disponibile.');
     const state = store.getState();
     const customer = state.customers.find((c) => c.id === orderInput.customerId);
     if (!customer) throw new Error('Cliente non trovato');
 
-    const agent = state.agents.find((a) => a.id === customer.salesAgentId) || state.agents[0];
+    const agent = state.agents.find((a) => a.id === customer.salesAgentId);
 
-    // Build items with pricing
-    let subtotal = 0;
-    const preparedItems = orderInput.items.map((item, idx) => {
-      const product = state.products.find((p) => p.id === item.productId);
-      if (!product) throw new Error(`Articolo ${item.productId} non trovato`);
+    const lines = await Promise.all(
+      orderInput.items.map(async (item) => {
+        const product = state.products.find((p) => p.id === item.productId);
+        if (!product) throw new Error(`Articolo ${item.productId} non trovato`);
+        const price = await erpGateway.calculatePrice({
+          customerId: customer.id,
+          productId: product.id,
+          quantity: item.quantity,
+        });
+        return { product, quantity: item.quantity, price };
+      })
+    );
 
-      const priceResult = erpGateway.calculatePrice({
-        customerId: customer.id,
-        productId: product.id,
-        quantity: item.quantity,
-      });
-
-      // Price calculation is synchronous in ApraErpGateway
-      const resolvedPrice = (priceResult as any).listPrice ? (priceResult as any) : {
-        listPrice: product.basePrice,
-        discount1: product.defaultDiscount1,
-        discount2: product.defaultDiscount2,
-        netPrice: product.basePrice * (1 - product.defaultDiscount1 / 100),
-        lineTotal: product.basePrice * (1 - product.defaultDiscount1 / 100) * item.quantity,
-      };
-
-      subtotal += resolvedPrice.lineTotal;
-
-      return {
-        id: `oi-${Date.now()}-${idx}`,
-        productId: product.id,
-        productCode: product.code,
-        productName: product.name,
-        packInfo: product.packInfo,
-        unit: product.unit,
-        quantity: item.quantity,
-        quantityShipped: 0,
-        listPrice: resolvedPrice.listPrice,
-        discount1: resolvedPrice.discount1,
-        discount2: resolvedPrice.discount2,
-        unitPrice: resolvedPrice.netPrice,
-        lineTotal: resolvedPrice.lineTotal,
-      };
-    });
-
-    const taxTotal = Math.round(subtotal * 0.22 * 100) / 100;
-    const total = Math.round((subtotal + taxTotal) * 100) / 100;
-
-    // ERP Credit validation
+    const subtotal = lines.reduce((sum, l) => sum + l.price.netPrice * l.quantity, 0);
+    const total = Math.round(subtotal * 1.22 * 100) / 100;
     const creditCheck = await erpGateway.validateCustomerCredit(customer.id, total);
 
-    const year = new Date().getFullYear();
-    const serialCount = state.orders.length + 37;
-    const padded = String(serialCount).padStart(7, '0');
-    const orderNumber = `${year}-OV-${padded}`;
-
-    const orderStatus: OrderStatus = creditCheck.isBlocked ? 'BLOCKED' : 'CONFIRMED';
-    const blockReason = creditCheck.isBlocked
-      ? creditCheck.warnings.join(' | ')
-      : undefined;
-
-    // Submit to ERP gateway
-    const erpResult = await erpGateway.submitOrder({
-      number: orderNumber,
-      orgId: customer.orgId,
-      total,
+    const { data, error } = await supabase.rpc('create_order', {
+      p_customer_id: customer.id,
+      p_items: lines.map((l) => ({
+        product_id: l.product.id,
+        quantity: l.quantity,
+        list_price: l.price.listPrice,
+        discount1: l.price.discount1,
+        discount2: l.price.discount2,
+        unit_price: Math.round(l.price.netPrice * 100) / 100,
+      })),
+      p_requested_delivery_date: orderInput.requestedDeliveryDate || null,
+      p_payment_term: orderInput.paymentTerm || null,
+      p_notes: orderInput.notes || null,
+      p_block_reason: creditCheck.isBlocked ? creditCheck.warnings.join(' | ') : null,
     });
+    if (error) throw new Error(this.describeError(error.message));
+    const created = data as { id: string; number: string };
 
-    const newOrder: Order = {
-      id: 'ord-' + Date.now(),
-      orgId: customer.orgId,
-      number: orderNumber,
-      customerId: customer.id,
-      customerCode: customer.code,
-      customerName: customer.businessName,
-      salesAgentId: agent.id,
-      salesAgentName: agent?.fullName || customer.salesAgentName || '',
-      status: orderStatus,
-      orderDate: new Date().toISOString().slice(0, 10),
-      requestedDeliveryDate: orderInput.requestedDeliveryDate,
-      paymentTerm: orderInput.paymentTerm || customer.paymentTerm,
-      causal: 'OV - ORDINI CLIENTI',
-      notes: orderInput.notes || '',
-      subtotal: Math.round(subtotal * 100) / 100,
-      discountTotal: 0,
-      taxTotal,
-      total,
-      residualTotal: total,
-      backOrder: false,
-      blockReason,
-      erpSyncStatus: 'SYNCED',
-      erpDocNumber: erpResult.erpDocNumber,
-      items: preparedItems,
-      createdAt: new Date().toISOString().replace('T', ' ').slice(0, 19),
-      updatedAt: new Date().toISOString().replace('T', ' ').slice(0, 19),
-    };
+    // Simulated ERP registration: store its document number on the order.
+    const erpResult = await erpGateway.submitOrder({ number: created.number, orgId: customer.orgId, total });
+    await supabase.from('orders').update({ erp_doc_number: erpResult.erpDocNumber }).eq('id', created.id);
 
-    // Calculate agent commission
-    const commissionAmount = Math.round(subtotal * ((agent?.commissionRate ?? 0) / 100) * 100) / 100;
-    const newCommission = {
-      id: 'comm-' + Date.now(),
-      orgId: customer.orgId,
-      salesAgentId: agent.id,
-      agentName: agent?.fullName || customer.salesAgentName || '',
-      orderId: newOrder.id,
-      orderNumber: newOrder.number,
-      customerName: customer.businessName,
-      baseAmount: subtotal,
-      percentage: agent?.commissionRate ?? 0,
-      amount: commissionAmount,
-      status: 'ACCRUED' as const,
-      accruedDate: newOrder.orderDate,
-    };
+    await store.syncOrders();
+    const order = this.getOrderById(created.id);
+    if (!order) throw new Error('Ordine salvato ma non leggibile: aggiorna la pagina.');
 
-    // Update state & deduct stock commitment
-    store.setState((prev) => {
-      // Update stock committed
-      const updatedStock = prev.stock.map((stk) => {
-        const item = preparedItems.find((pi) => pi.productId === stk.productId);
-        if (item && stk.warehouseName.includes('Centrale')) {
-          return {
-            ...stk,
-            quantityCommitted: stk.quantityCommitted + item.quantity,
-            quantityAvailable: Math.max(0, stk.quantityOnHand - (stk.quantityCommitted + item.quantity)),
-          };
-        }
-        return stk;
-      });
-
-      // Update customer exposure and lastOrderDate
-      const updatedCustomers = prev.customers.map((c) => {
-        if (c.id === customer.id) {
-          return {
-            ...c,
-            currentExposure: c.currentExposure + total,
-            lastOrderDate: newOrder.orderDate,
-          };
-        }
-        return c;
-      });
-
-      return {
-        ...prev,
-        orders: [newOrder, ...prev.orders],
-        commissions: [newCommission, ...prev.commissions],
-        stock: updatedStock,
-        customers: updatedCustomers,
-      };
-    });
-
-    return {
-      order: newOrder,
-      isBlocked: creditCheck.isBlocked,
-      warnings: creditCheck.warnings,
-    };
-  }
-
-  public updateOrderStatus(orderId: string, status: OrderStatus): void {
+    // Commissions and stock are still local demo data.
+    const commissionRate = agent?.commissionRate ?? 0;
     store.setState((prev) => ({
       ...prev,
-      orders: prev.orders.map((o) =>
-        o.id === orderId
-          ? {
-              ...o,
-              status,
-              updatedAt: new Date().toISOString().replace('T', ' ').slice(0, 19),
-            }
-          : o
+      commissions: [
+        {
+          id: 'comm-' + Date.now(),
+          orgId: customer.orgId,
+          salesAgentId: customer.salesAgentId,
+          agentName: agent?.fullName || customer.salesAgentName || '',
+          orderId: order.id,
+          orderNumber: order.number,
+          customerName: customer.businessName,
+          baseAmount: order.subtotal,
+          percentage: commissionRate,
+          amount: Math.round(order.subtotal * (commissionRate / 100) * 100) / 100,
+          status: 'ACCRUED' as const,
+          accruedDate: order.orderDate,
+        },
+        ...prev.commissions,
+      ],
+      stock: prev.stock.map((stk) => {
+        const line = lines.find((l) => l.product.id === stk.productId);
+        if (!line || !stk.warehouseName.includes('Centrale')) return stk;
+        const committed = stk.quantityCommitted + line.quantity;
+        return { ...stk, quantityCommitted: committed, quantityAvailable: Math.max(0, stk.quantityOnHand - committed) };
+      }),
+      customers: prev.customers.map((c) =>
+        c.id === customer.id
+          ? { ...c, currentExposure: c.currentExposure + order.total, lastOrderDate: order.orderDate }
+          : c
       ),
     }));
+
+    return { order, isBlocked: creditCheck.isBlocked, warnings: creditCheck.warnings };
+  }
+
+  public async updateOrderStatus(orderId: string, status: OrderStatus): Promise<void> {
+    if (!supabase) throw new Error('Servizio ordini non disponibile.');
+    const { data, error } = await supabase
+      .from('orders')
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq('id', orderId)
+      .select('id');
+    if (error) throw new Error(this.describeError(error.message));
+    if (!data || data.length === 0) throw new Error('Non hai i permessi per modificare questo ordine.');
+    await store.syncOrders();
+  }
+
+  private describeError(message: string): string {
+    if (/create_order|schema cache|order_items/i.test(message)) {
+      return 'Archivio ordini non ancora configurato sul database (migrazione 005).';
+    }
+    if (/row-level security|permission denied/i.test(message)) {
+      return 'Non hai i permessi per questa operazione.';
+    }
+    return message || 'Operazione non riuscita.';
   }
 }
 

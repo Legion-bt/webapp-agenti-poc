@@ -51,8 +51,12 @@ export const OrderDetailView: React.FC<OrderDetailViewProps> = ({
   if (order.status === 'INVOICED') currentStageIndex = 4;
   if (order.status === 'BLOCKED') currentStageIndex = 1;
 
-  const handleAdvanceStatus = (newStatus: OrderStatus) => {
-    orderService.updateOrderStatus(order.id, newStatus);
+  const handleAdvanceStatus = async (newStatus: OrderStatus) => {
+    try {
+      await orderService.updateOrderStatus(order.id, newStatus);
+    } catch (err: any) {
+      alert(`Stato non aggiornato: ${err.message}`);
+    }
   };
 
   return (

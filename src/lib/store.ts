@@ -456,9 +456,75 @@ class Store {
           activeOrgId,
         };
       });
+
+      await this.syncOrders();
     } catch (err) {
       console.warn('Sync from Supabase live skipped:', err);
     }
+  }
+
+  /** Reloads the orders the current user can see (RLS) with their lines. */
+  public async syncOrders(): Promise<void> {
+    if (!supabase) return;
+    const { data, error } = await supabase
+      .from('orders')
+      .select(
+        '*, customers(code, business_name), sales_agents(full_name), ' +
+          'order_items(*, products(code, name, pack_info, unit))'
+      )
+      .order('created_at', { ascending: false });
+    if (error) {
+      // Typically migration 005 not applied yet: keep the current list.
+      console.warn('Orders sync skipped:', error.message);
+      return;
+    }
+
+    const orders: Order[] = (data || []).map((o: any) => ({
+      id: o.id,
+      orgId: o.org_id,
+      number: o.number,
+      customerId: o.customer_id,
+      customerCode: o.customers?.code || '',
+      customerName: o.customers?.business_name || '',
+      salesAgentId: o.sales_agent_id,
+      salesAgentName: o.sales_agents?.full_name || '',
+      status: o.status,
+      orderDate: o.order_date || '',
+      requestedDeliveryDate: o.requested_delivery_date || '',
+      paymentTerm: o.payment_term || '',
+      causal: o.causal || 'OV - ORDINI CLIENTI',
+      notes: o.notes || '',
+      subtotal: Number(o.subtotal ?? 0),
+      discountTotal: Number(o.discount_total ?? 0),
+      taxTotal: Number(o.tax_total ?? 0),
+      total: Number(o.total ?? 0),
+      residualTotal: Number(o.residual_total ?? 0),
+      backOrder: o.back_order ?? false,
+      blockReason: o.block_reason || undefined,
+      erpSyncStatus: o.erp_sync_status || 'SYNCED',
+      erpDocNumber: o.erp_doc_number || undefined,
+      items: (o.order_items || []).map((i: any) => ({
+        id: i.id,
+        orderId: i.order_id,
+        productId: i.product_id,
+        productCode: i.products?.code || '',
+        productName: i.products?.name || '',
+        packInfo: i.products?.pack_info || '',
+        unit: i.products?.unit || '',
+        quantity: Number(i.quantity ?? 0),
+        quantityShipped: Number(i.quantity_shipped ?? 0),
+        listPrice: Number(i.list_price ?? 0),
+        discount1: Number(i.discount1 ?? 0),
+        discount2: Number(i.discount2 ?? 0),
+        unitPrice: Number(i.unit_price ?? 0),
+        lineTotal: Number(i.line_total ?? 0),
+        notes: i.notes || undefined,
+      })),
+      createdAt: o.created_at || '',
+      updatedAt: o.updated_at || o.created_at || '',
+    }));
+
+    this.setState((prev) => ({ ...prev, orders }));
   }
 }
 
