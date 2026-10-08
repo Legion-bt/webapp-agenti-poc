@@ -1,0 +1,17 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+# note operative
+note_operative/
+# credenziali e note locali
+*.local
+supabase_progetto.txt
+
+# Vercel CLI
+.vercel

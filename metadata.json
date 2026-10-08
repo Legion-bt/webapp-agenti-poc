@@ -1,0 +1,8 @@
+{
+  "name": "AgenteGo ERP - B2B Sales Agent Portal & Multi-tenant Hub",
+  "description": "Piattaforma SaaS multi-tenant per agenti commerciali B2B, gestione ordini, listini dinamici, catalogo, monitoraggio vendite e sincronizzazione ERP centrale.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
