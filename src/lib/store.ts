@@ -233,11 +233,12 @@ class Store {
     // 2. Try fetching from 'sales_agents' table
     let agentData: any = null;
     try {
-      const { data: aData } = await supabase
-        .from('sales_agents')
-        .select('*')
-        .eq('email', userEmail)
-        .maybeSingle();
+      // Linked agent record (profiles.agent_id, migration 004); older setups match by email.
+      const agentQuery = supabase.from('sales_agents').select('*');
+      const { data: aData } = await (profileData?.agent_id
+        ? agentQuery.eq('id', profileData.agent_id)
+        : agentQuery.eq('email', userEmail)
+      ).maybeSingle();
       agentData = aData;
     } catch (err) {
       console.warn('Could not query sales_agents table:', err);

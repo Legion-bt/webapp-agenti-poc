@@ -1,5 +1,29 @@
 export type UserRole = 'HQ_SUPERADMIN' | 'ORG_ADMIN' | 'AGENT';
 
+/** A login account as returned by the admin-users Edge Function. */
+export interface ManagedUser {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: UserRole | null;
+  orgId: string | null;
+  agentId: string | null;
+  createdAt: string;
+  lastSignInAt: string | null;
+  disabled: boolean;
+}
+
+export interface ManagedUserInput {
+  email?: string;
+  password?: string;
+  firstName: string;
+  lastName: string;
+  role: UserRole;
+  orgId: string | null;
+  agentId: string | null;
+}
+
 export interface UserProfile {
   id: string;
   email: string;

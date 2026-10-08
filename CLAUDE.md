@@ -62,6 +62,10 @@ al posto dello store locale.
   `supabase/seed.sql`, `supabase/setup_complete.sql` (versione "tutto in uno" da incollare nel
   SQL Editor). Non è verificato quale sia applicato sul cloud né se coincidano: controllare
   prima di scrivere nuove migrazioni.
+- Applicate sul cloud dall'utente (SQL Editor): `002` (profiles, RLS per ruolo, documenti PDF) e
+  `003` (dati demo). `004` (profiles.agent_id) e la Edge Function `supabase/functions/admin-users`
+  (gestione utenti, usa la service_role lato server) vanno applicate/pubblicate dall'utente.
+  La Edge Function è esclusa dal `tsc` del progetto (è codice Deno).
 - Regole per lo schema (stesse di ShiftOps): ogni nuova tabella in `public` con GRANT espliciti,
   RLS abilitata e policy separate per select/insert/update/delete; ruoli in tabella dedicata,
   non controllati lato client. Nuove modifiche come **nuovi file** numerati in
