@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
 
   try {
     const url = Deno.env.get('SUPABASE_URL');
-    const serviceKey = Deno.env.get('SUPABASE_SECRET_KEY') || Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const serviceKey = readSecretKey();
     if (!url || !serviceKey) throw new HttpError(500, 'Funzione non configurata (chiave di servizio mancante).');
 
     const admin = createClient(url, serviceKey, { auth: { autoRefreshToken: false, persistSession: false } });
@@ -104,6 +104,27 @@ Deno.serve(async (req) => {
 });
 
 // ---------------------------------------------------------------------------
+
+/**
+ * Server-side key: a custom SUPABASE_SECRET_KEY secret, the new-style secret keys
+ * injected by the platform (SUPABASE_SECRET_KEYS, JSON name -> key), or the legacy
+ * service_role key.
+ */
+function readSecretKey(): string | undefined {
+  const custom = Deno.env.get('SUPABASE_SECRET_KEY');
+  if (custom) return custom;
+  const injected = Deno.env.get('SUPABASE_SECRET_KEYS');
+  if (injected) {
+    try {
+      const keys = JSON.parse(injected) as Record<string, string>;
+      const key = keys.default || Object.values(keys)[0];
+      if (key) return key;
+    } catch {
+      /* not JSON: fall through to the legacy key */
+    }
+  }
+  return Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+}
 
 async function getProfile(admin: SupabaseClient, id: string): Promise<Profile | null> {
   const { data, error } = await admin.from('profiles').select('*').eq('id', id).maybeSingle();
