@@ -183,7 +183,7 @@ class Store {
 
   public async loginWithSupabase(email: string, password: string): Promise<{ success: boolean; error?: string }> {
     if (!supabase || !isSupabaseConfigured) {
-      return { success: false, error: 'Configurazione Supabase non disponibile.' };
+      return { success: false, error: 'Servizio di accesso non disponibile.' };
     }
 
     try {
@@ -195,21 +195,21 @@ class Store {
       if (error) {
         let msg = error.message;
         if (msg.includes('Invalid login credentials')) {
-          msg = 'Credenziali non valide. Verifica l\'email e la password create nel tuo database Supabase.';
+          msg = 'Email o password non corrette.';
         } else if (msg.includes('Email not confirmed')) {
-          msg = 'Email non confermata in Supabase. Conferma l\'indirizzo o disabilita la conferma email nella dashboard di Supabase.';
+          msg = 'Indirizzo email non ancora confermato. Controlla la tua casella di posta.';
         }
         return { success: false, error: msg };
       }
 
       if (!data?.user) {
-        return { success: false, error: 'Nessun utente restituito dal server Supabase.' };
+        return { success: false, error: 'Accesso non riuscito. Riprova.' };
       }
 
       await this.restoreSupabaseSession(data.user);
       return { success: true };
     } catch (err: any) {
-      return { success: false, error: err.message || 'Errore durante l\'autenticazione con Supabase' };
+      return { success: false, error: 'Impossibile contattare il servizio di accesso. Riprova tra qualche istante.' };
     }
   }
 
