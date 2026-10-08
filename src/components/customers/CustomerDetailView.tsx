@@ -4,6 +4,7 @@ import { CustomerSuspendedItem } from '../../types';
 import { StatusBadge } from '../common/StatusBadge';
 import { CreditAlertBanner } from '../common/CreditAlertBanner';
 import { PaymentModal } from '../common/PaymentModal';
+import { CustomerDocumentsPanel } from './CustomerDocumentsPanel';
 import {
   ArrowLeft,
   ShoppingCart,
@@ -14,6 +15,7 @@ import {
   Building2,
   CalendarCheck,
   ShieldAlert,
+  FileText,
 } from 'lucide-react';
 
 interface CustomerDetailViewProps {
@@ -28,7 +30,7 @@ export const CustomerDetailView: React.FC<CustomerDetailViewProps> = ({
   onBack,
 }) => {
   const [activeTab, setActiveTab] = useState<
-    'overview' | 'orders' | 'suspended' | 'pricing' | 'visits' | 'fiscal'
+    'overview' | 'orders' | 'suspended' | 'pricing' | 'visits' | 'fiscal' | 'documents'
   >('suspended'); // default to suspended if has overdue to highlight Screenshot 3!
 
   const [paymentTargetItem, setPaymentTargetItem] = useState<CustomerSuspendedItem | null>(null);
@@ -137,6 +139,7 @@ export const CustomerDetailView: React.FC<CustomerDetailViewProps> = ({
             { id: 'orders', label: 'Storico Ordini', icon: ShoppingCart },
             { id: 'pricing', label: 'Listino & Prezzi Dedicati', icon: Building2 },
             { id: 'visits', label: 'Visite & Note CRM', icon: CalendarCheck },
+            { id: 'documents', label: 'Documenti', icon: FileText },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -532,6 +535,9 @@ export const CustomerDetailView: React.FC<CustomerDetailViewProps> = ({
           </p>
         </div>
       )}
+
+      {/* Tab 7: Documenti PDF */}
+      {activeTab === 'documents' && <CustomerDocumentsPanel customerId={customer.id} />}
 
       {/* Payment Modal */}
       {paymentTargetItem && (

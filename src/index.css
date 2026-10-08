@@ -2,6 +2,14 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Extra-small sizes used across the app (not part of Tailwind's default scale). */
+@theme {
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+  --text-3xs: 0.625rem;
+  --text-3xs--line-height: 0.875rem;
+}
+
 @layer base {
   :root {
     --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -182,4 +190,62 @@
 .dark .bg-purple-100 {
   background-color: rgba(88, 28, 135, 0.35);
   color: #d8b4fe;
+}
+
+/*
+ * Login page: animated gradient blobs + frosted glass inputs.
+ * .login-input needs !important to beat the global dark-mode input overrides above.
+ */
+@keyframes login-drift-a {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(8vw, 6vh) scale(1.15); }
+  66% { transform: translate(-4vw, 10vh) scale(0.95); }
+}
+
+@keyframes login-drift-b {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-10vw, -8vh) scale(1.2); }
+}
+
+@keyframes login-drift-c {
+  0%, 100% { transform: translate(0, 0) scale(1.1); }
+  50% { transform: translate(6vw, -10vh) scale(0.9); }
+}
+
+@keyframes login-rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.login-blob-a { animation: login-drift-a 22s ease-in-out infinite; }
+.login-blob-b { animation: login-drift-b 26s ease-in-out infinite; }
+.login-blob-c { animation: login-drift-c 30s ease-in-out infinite; }
+.login-rise { animation: login-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .login-blob-a, .login-blob-b, .login-blob-c, .login-rise { animation: none; }
+}
+
+input.login-input,
+.dark input.login-input:not([type="checkbox"]):not([type="radio"]) {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+}
+
+input.login-input::placeholder,
+.dark input.login-input::placeholder {
+  color: rgba(255, 255, 255, 0.35) !important;
+}
+
+input.login-input:focus,
+.dark input.login-input:not([type="checkbox"]):not([type="radio"]):focus {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(167, 139, 250, 0.8) !important;
+}
+
+input.login-input:-webkit-autofill {
+  -webkit-text-fill-color: #ffffff;
+  -webkit-box-shadow: 0 0 0 1000px #1a1530 inset;
+  caret-color: #ffffff;
 }

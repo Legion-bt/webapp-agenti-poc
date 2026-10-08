@@ -331,3 +331,14 @@ export interface ErpSyncLog {
   message: string;
   durationMs: number;
 }
+
+export interface CustomerDocument {
+  id: string;
+  customerId: string;
+  fileName: string;
+  storagePath: string;
+  sizeBytes: number;
+  uploadedBy: string | null;
+  uploadedByName: string | null;
+  createdAt: string;
+}

@@ -43,7 +43,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
               Bentornato, {currentProfile.firstName}
             </h1>
             <span className="bg-blue-50 text-blue-700 text-xs font-bold px-2 py-0.5 rounded-full border border-blue-200">
-              {currentProfile.role === 'AGENT' ? `Agente ${activeAgent.area}` : 'Sales Management'}
+              {currentProfile.role === 'AGENT' ? (activeAgent?.area ? `Agente ${activeAgent.area}` : 'Agente') : currentProfile.role === 'ORG_ADMIN' ? 'Manager' : 'Sede centrale'}
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-1">
@@ -88,7 +88,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
             <span className="text-emerald-600 font-bold flex items-center">
               <TrendingUp className="w-3 h-3 mr-0.5" /> 53%
             </span>
-            <span>di target €{activeAgent.monthlyTarget.toLocaleString('it-IT')}</span>
+            <span>di target €{(activeAgent?.monthlyTarget ?? 0).toLocaleString('it-IT')}</span>
           </div>
           <div className="w-full bg-slate-100 rounded-full h-1 mt-2">
             <div className="bg-blue-600 h-1 rounded-full" style={{ width: '53%' }} />
@@ -148,7 +148,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
           </div>
           <div className="flex items-center justify-between text-2xs mt-2 text-slate-500">
             <span>Aliquota contrattuale:</span>
-            <span className="font-bold text-slate-800">{activeAgent.commissionRate}%</span>
+            <span className="font-bold text-slate-800">{activeAgent?.commissionRate ?? 0}%</span>
           </div>
         </div>
       </div>

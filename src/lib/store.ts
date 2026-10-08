@@ -321,86 +321,140 @@ class Store {
     }));
   }
 
+  /**
+   * Pulls the data the current user is allowed to see (RLS decides) and replaces
+   * the local copies. Runs only with a Supabase session; demo data stays otherwise.
+   */
   public async syncFromSupabase(): Promise<void> {
     if (!supabase || !isSupabaseConfigured) return;
 
     try {
-      // Fetch live customers from Supabase
-      const { data: supaCustomers } = await supabase.from('customers').select('*');
-      const { data: supaProducts } = await supabase.from('products').select('*');
-      const { data: supaOrders } = await supabase.from('orders').select('*');
-      const { data: supaSuspended } = await supabase.from('customer_suspended_items').select('*');
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
 
-      if (supaCustomers && supaCustomers.length > 0) {
-        this.setState((prev) => {
-          // Merge customers
-          const mappedCustomers: Customer[] = supaCustomers.map((sc: any) => ({
-            id: sc.id,
-            orgId: sc.org_id || 'org-01',
-            code: sc.code,
-            businessName: sc.business_name,
-            vatNumber: sc.vat_number,
-            taxCode: sc.tax_code,
-            sdiCode: sc.sdi_code || '0000000',
-            email: sc.email,
-            pec: sc.pec || '',
-            phone: sc.phone || '',
-            mobile: sc.mobile || '',
-            address: sc.address,
-            city: sc.city,
-            province: sc.province,
-            postalCode: sc.postal_code,
-            country: sc.country || 'ITALIA',
-            area: sc.area || '',
-            salesAgentId: sc.sales_agent_id || 'agent-01',
-            salesAgentName: 'Alessandro Manoni',
-            priceListId: sc.price_list_id || 'pl-01',
-            priceListName: '01_002 Listino Base 2026',
-            paymentTerm: sc.payment_term || 'Bonifico 30/60/90',
-            iban: sc.iban || '',
-            bankName: sc.bank_name || '',
-            deliveryNotes: sc.delivery_notes || '',
-            creditLimit: Number(sc.credit_limit) || 950000,
-            currentExposure: Number(sc.current_exposure) || 929762.68,
-            overdueAmount: Number(sc.overdue_amount) || 811008.82,
-            status: sc.status || 'BLOCKED',
-            category: sc.category || 'HOTEL 3-4',
-            createdAt: sc.created_at || '2026-01-01',
-            updatedAt: sc.updated_at || '2026-10-07',
-          }));
+      const [orgsRes, agentsRes, customersRes, priceListsRes, productsRes] = await Promise.all([
+        supabase.from('organizations').select('*').order('name'),
+        supabase.from('sales_agents').select('*').order('full_name'),
+        supabase.from('customers').select('*').order('business_name'),
+        supabase.from('price_lists').select('id, name'),
+        supabase.from('products').select('*'),
+      ]);
 
-          // Merge products
-          const mappedProducts: Product[] = (supaProducts && supaProducts.length > 0)
-            ? supaProducts.map((sp: any) => ({
-                id: sp.id,
-                orgId: sp.org_id || 'org-01',
-                code: sp.code,
-                barcode: sp.barcode || '',
-                name: sp.name,
-                description: sp.description || '',
-                categoryId: sp.category_id || 'cat-01',
-                categoryName: sp.code.startsWith('OL') ? 'OLIO IMBOTTIGLIATO' : 'DOCG IMBOTTIGLIATI',
-                brand: sp.brand || '',
-                unit: sp.unit || 'BT',
-                packInfo: sp.pack_info || '12 BT x CA12',
-                basePrice: Number(sp.base_price) || 18,
-                costPrice: Number(sp.cost_price) || 8,
-                defaultDiscount1: Number(sp.default_discount1) || 0,
-                defaultDiscount2: Number(sp.default_discount2) || 0,
-                defaultDiscount3: Number(sp.default_discount3) || 0,
-                imageUrl: sp.image_url || 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=500',
-                active: sp.active ?? true,
-                isPromo: sp.is_promo ?? false,
-              }))
-            : prev.products;
-
-          return {
-            ...prev,
-            customers: mappedCustomers.length > 0 ? mappedCustomers : prev.customers,
-            products: mappedProducts.length > 0 ? mappedProducts : prev.products,
-          };
-        });
+      const firstError = [orgsRes, agentsRes, customersRes].find((r) => r.error)?.error;
+      if (firstError) {
+        console.warn('Sync from Supabase skipped:', firstError.message);
+        return;
       }
+
+      const organizations: Organization[] = (orgsRes.data || []).map((o: any) => ({
+        id: o.id,
+        code: o.code,
+        name: o.name,
+        legalName: o.legal_name || o.name,
+        vatNumber: o.vat_number || '',
+        taxCode: o.tax_code || '',
+        address: o.address || '',
+        city: o.city || '',
+        province: o.province || '',
+        erpConnectorType: o.erp_connector_type || 'APRA_ERP',
+        erpEndpoint: o.erp_endpoint || '',
+        erpStatus: o.erp_status || 'CONNECTED',
+        erpLastSync: o.erp_last_sync || '',
+        agentsCount: (agentsRes.data || []).filter((a: any) => a.org_id === o.id).length,
+        customersCount: (customersRes.data || []).filter((c: any) => c.org_id === o.id).length,
+        active: o.active ?? true,
+        createdAt: o.created_at || '',
+      }));
+
+      const agents: SalesAgent[] = (agentsRes.data || []).map((a: any) => ({
+        id: a.id,
+        orgId: a.org_id,
+        profileId: a.profile_id || '',
+        code: a.code,
+        fullName: a.full_name,
+        email: a.email || '',
+        phone: a.phone || '',
+        area: a.area || '',
+        commissionRate: Number(a.commission_rate ?? 0),
+        monthlyTarget: Number(a.monthly_target ?? 0),
+        yearlyTarget: Number(a.yearly_target ?? 0),
+        active: a.active ?? true,
+      }));
+
+      const agentNames = new Map(agents.map((a) => [a.id, a.fullName]));
+      const priceListNames = new Map((priceListsRes.data || []).map((p: any) => [p.id, p.name]));
+
+      const customers: Customer[] = (customersRes.data || []).map((sc: any) => ({
+        id: sc.id,
+        orgId: sc.org_id,
+        code: sc.code,
+        businessName: sc.business_name,
+        vatNumber: sc.vat_number || '',
+        taxCode: sc.tax_code || '',
+        sdiCode: sc.sdi_code || '0000000',
+        email: sc.email || '',
+        pec: sc.pec || '',
+        phone: sc.phone || '',
+        mobile: sc.mobile || '',
+        address: sc.address || '',
+        city: sc.city || '',
+        province: sc.province || '',
+        postalCode: sc.postal_code || '',
+        country: sc.country || 'ITALIA',
+        area: sc.area || '',
+        salesAgentId: sc.sales_agent_id || '',
+        salesAgentName: agentNames.get(sc.sales_agent_id) || '',
+        priceListId: sc.price_list_id || '',
+        priceListName: priceListNames.get(sc.price_list_id) || '',
+        paymentTerm: sc.payment_term || '',
+        iban: sc.iban || '',
+        bankName: sc.bank_name || '',
+        deliveryNotes: sc.delivery_notes || '',
+        creditLimit: Number(sc.credit_limit ?? 0),
+        currentExposure: Number(sc.current_exposure ?? 0),
+        overdueAmount: Number(sc.overdue_amount ?? 0),
+        status: sc.status || 'ACTIVE',
+        category: sc.category || '',
+        notes: sc.notes || undefined,
+        createdAt: sc.created_at || '',
+        updatedAt: sc.updated_at || '',
+      }));
+
+      const products: Product[] = (productsRes.data || []).map((sp: any) => ({
+        id: sp.id,
+        orgId: sp.org_id || '',
+        code: sp.code,
+        barcode: sp.barcode || '',
+        name: sp.name,
+        description: sp.description || '',
+        categoryId: sp.category_id || '',
+        categoryName: sp.code?.startsWith('OL') ? 'OLIO IMBOTTIGLIATO' : 'DOCG IMBOTTIGLIATI',
+        brand: sp.brand || '',
+        unit: sp.unit || 'BT',
+        packInfo: sp.pack_info || '',
+        basePrice: Number(sp.base_price ?? 0),
+        costPrice: Number(sp.cost_price ?? 0),
+        defaultDiscount1: Number(sp.default_discount1 ?? 0),
+        defaultDiscount2: Number(sp.default_discount2 ?? 0),
+        defaultDiscount3: Number(sp.default_discount3 ?? 0),
+        imageUrl: sp.image_url || '',
+        active: sp.active ?? true,
+        isPromo: sp.is_promo ?? false,
+      }));
+
+      this.setState((prev) => {
+        const activeOrgId = organizations.some((o) => o.id === prev.activeOrgId)
+          ? prev.activeOrgId
+          : organizations[0]?.id || prev.activeOrgId;
+        return {
+          ...prev,
+          organizations: organizations.length > 0 ? organizations : prev.organizations,
+          agents,
+          customers,
+          products: products.length > 0 ? products : prev.products,
+          activeOrgId,
+        };
+      });
     } catch (err) {
       console.warn('Sync from Supabase live skipped:', err);
     }

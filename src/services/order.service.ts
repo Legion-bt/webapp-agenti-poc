@@ -140,7 +140,7 @@ export class OrderService {
       customerCode: customer.code,
       customerName: customer.businessName,
       salesAgentId: agent.id,
-      salesAgentName: agent.fullName,
+      salesAgentName: agent?.fullName || customer.salesAgentName || '',
       status: orderStatus,
       orderDate: new Date().toISOString().slice(0, 10),
       requestedDeliveryDate: orderInput.requestedDeliveryDate,
@@ -162,17 +162,17 @@ export class OrderService {
     };
 
     // Calculate agent commission
-    const commissionAmount = Math.round(subtotal * (agent.commissionRate / 100) * 100) / 100;
+    const commissionAmount = Math.round(subtotal * ((agent?.commissionRate ?? 0) / 100) * 100) / 100;
     const newCommission = {
       id: 'comm-' + Date.now(),
       orgId: customer.orgId,
       salesAgentId: agent.id,
-      agentName: agent.fullName,
+      agentName: agent?.fullName || customer.salesAgentName || '',
       orderId: newOrder.id,
       orderNumber: newOrder.number,
       customerName: customer.businessName,
       baseAmount: subtotal,
-      percentage: agent.commissionRate,
+      percentage: agent?.commissionRate ?? 0,
       amount: commissionAmount,
       status: 'ACCRUED' as const,
       accruedDate: newOrder.orderDate,

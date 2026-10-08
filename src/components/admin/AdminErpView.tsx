@@ -164,7 +164,7 @@ export const AdminErpView: React.FC = () => {
             Accede con permessi RLS ai soli clienti assegnati, crea ordini offline/online, verifica fidi e registra incassi.
           </p>
           <div className="text-3xs font-mono text-emerald-700 bg-emerald-50 p-2 rounded border border-emerald-200">
-            Area: {state.agents[0].area} • Provvigione: {state.agents[0].commissionRate}%
+            Area: {state.agents[0]?.area || '—'} • Provvigione: {state.agents[0]?.commissionRate ?? 0}%
           </div>
         </div>
       </div>
