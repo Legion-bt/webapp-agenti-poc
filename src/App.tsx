@@ -21,6 +21,8 @@ import { CommissionsView } from './components/commissions/CommissionsView';
 import { AnalyticsView } from './components/analytics/AnalyticsView';
 import { AdminErpView } from './components/admin/AdminErpView';
 import { UsersView } from './components/admin/UsersView';
+import { OrganizationsView } from './components/admin/OrganizationsView';
+import { organizationService } from './services/organization.service';
 import { userService } from './services/user.service';
 import { LoginView } from './components/auth/LoginView';
 
@@ -150,6 +152,10 @@ export default function App() {
 
           {currentView === 'admin-users' && userService.canManageUsers() && (
             <UsersView />
+          )}
+
+          {currentView === 'admin-orgs' && organizationService.canManageOrganizations() && (
+            <OrganizationsView organizations={state.organizations} onNavigate={handleNavigate} />
           )}
 
           {currentView === 'admin-erp' && (

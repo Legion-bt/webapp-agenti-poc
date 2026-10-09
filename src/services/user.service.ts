@@ -9,6 +9,16 @@ export interface DirectoryOrganization {
   id: string;
   code: string;
   name: string;
+  active: boolean;
+}
+
+export interface NewAgentRecord {
+  orgId: string;
+  code: string;
+  fullName: string;
+  email: string;
+  area: string;
+  commissionRate: number;
 }
 
 export interface DirectoryAgent {
@@ -69,13 +79,13 @@ export class UserService {
   public async loadDirectory(): Promise<{ organizations: DirectoryOrganization[]; agents: DirectoryAgent[] }> {
     if (!supabase) return { organizations: [], agents: [] };
     const [orgs, agents] = await Promise.all([
-      supabase.from('organizations').select('id, code, name').order('code'),
+      supabase.from('organizations').select('id, code, name, active').order('code'),
       supabase.from('sales_agents').select('id, org_id, code, full_name, area').order('full_name'),
     ]);
     if (orgs.error) throw new Error(orgs.error.message);
     if (agents.error) throw new Error(agents.error.message);
     return {
-      organizations: (orgs.data || []).map((o: any) => ({ id: o.id, code: o.code, name: o.name })),
+      organizations: (orgs.data || []).map((o: any) => ({ id: o.id, code: o.code, name: o.name, active: o.active !== false })),
       agents: (agents.data || []).map((a: any) => ({
         id: a.id,
         orgId: a.org_id,
@@ -84,6 +94,44 @@ export class UserService {
         area: a.area || '',
       })),
     };
+  }
+
+  /**
+   * Creates the agent record a new AGENT user is linked to (RLS: HQ, or a manager of
+   * that organization). Returns its id.
+   */
+  public async createAgentRecord(input: NewAgentRecord): Promise<string> {
+    if (!supabase) throw new Error('Servizio non disponibile.');
+    const code = input.code.trim();
+    if (!code) throw new Error('Inserisci il codice agente.');
+    const rate = Number(input.commissionRate);
+    if (!Number.isFinite(rate) || rate < 0 || rate > 100) throw new Error('La provvigione deve essere tra 0 e 100%.');
+    const { data, error } = await supabase
+      .from('sales_agents')
+      .insert({
+        org_id: input.orgId,
+        code,
+        full_name: input.fullName.trim(),
+        email: input.email.trim().toLowerCase(),
+        area: input.area.trim() || null,
+        commission_rate: rate,
+      })
+      .select('id')
+      .single();
+    if (error) {
+      if (error.code === '23505') throw new Error(`Il codice agente "${code}" è già usato in questa organizzazione.`);
+      if (/row-level security|violates|42501/i.test(error.message)) {
+        throw new Error('Non hai i permessi per creare schede agente in questa organizzazione.');
+      }
+      throw new Error(error.message);
+    }
+    return data.id;
+  }
+
+  /** Removes an agent record created for a user whose creation then failed. */
+  public async deleteAgentRecord(agentId: string): Promise<void> {
+    if (!supabase) return;
+    await supabase.from('sales_agents').delete().eq('id', agentId);
   }
 
   /** Random password without ambiguous characters, to hand over to the new user. */

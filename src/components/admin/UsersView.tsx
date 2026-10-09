@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { userService, DirectoryAgent, DirectoryOrganization } from '../../services/user.service';
 import { ManagedUser, ManagedUserInput, UserRole } from '../../types';
+import { Field, IconButton, Modal, fieldClass } from './ui';
 import {
   UserPlus,
   Search,
@@ -52,6 +53,9 @@ const initialsOf = (u: ManagedUser) =>
   ((u.firstName.charAt(0) || u.email.charAt(0)) + u.lastName.charAt(0)).toUpperCase();
 
 const displayName = (u: ManagedUser) => `${u.firstName} ${u.lastName}`.trim() || u.email.split('@')[0];
+
+// Value of the agent select that creates a new agent record together with the user.
+const NEW_AGENT = '__new__';
 
 type Dialog =
   | { kind: 'create' }
@@ -346,71 +350,6 @@ export const UsersView: React.FC = () => {
 
 // ---------------------------------------------------------------------------
 
-const IconButton: React.FC<{ title: string; onClick: () => void; icon: React.ElementType; danger?: boolean }> = ({
-  title,
-  onClick,
-  icon: Icon,
-  danger,
-}) => (
-  <button
-    onClick={onClick}
-    title={title}
-    aria-label={title}
-    className={`cursor-pointer p-2 rounded-lg text-slate-500 transition-colors ${
-      danger ? 'hover:text-rose-600 hover:bg-rose-50' : 'hover:text-slate-900 hover:bg-slate-100'
-    }`}
-  >
-    <Icon className="w-4 h-4" />
-  </button>
-);
-
-const Modal: React.FC<{ title: string; subtitle?: string; onClose: () => void; children: React.ReactNode }> = ({
-  title,
-  subtitle,
-  onClose,
-  children,
-}) => {
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [onClose]);
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-xs" onClick={onClose} />
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-        className="relative w-full sm:max-w-lg max-h-[92vh] overflow-y-auto bg-white rounded-t-2xl sm:rounded-2xl border border-slate-200 shadow-xl"
-      >
-        <div className="sticky top-0 z-10 flex items-start justify-between gap-4 px-6 pt-5 pb-4 bg-white border-b border-slate-100">
-          <div>
-            <h2 className="text-base font-bold text-slate-900">{title}</h2>
-            {subtitle && <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>}
-          </div>
-          <button onClick={onClose} className="cursor-pointer p-1.5 -mr-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100" aria-label="Chiudi">
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-        <div className="px-6 py-5">{children}</div>
-      </div>
-    </div>
-  );
-};
-
-const fieldClass =
-  'w-full h-10 px-3 rounded-lg border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 disabled:bg-slate-50 disabled:text-slate-500';
-
-const Field: React.FC<{ label: string; hint?: string; children: React.ReactNode }> = ({ label, hint, children }) => (
-  <label className="block">
-    <span className="block text-xs font-semibold text-slate-700 mb-1.5">{label}</span>
-    {children}
-    {hint && <span className="block text-xs text-slate-500 mt-1.5">{hint}</span>}
-  </label>
-);
-
 const PasswordInput: React.FC<{ value: string; onChange: (v: string) => void }> = ({ value, onChange }) => {
   const [visible, setVisible] = useState(true);
   return (
@@ -465,6 +404,7 @@ const UserFormDialog: React.FC<{
   const [role, setRole] = useState<UserRole>(user?.role || 'AGENT');
   const [orgId, setOrgId] = useState<string>(user?.orgId || (organizations.length === 1 ? organizations[0].id : ''));
   const [agentId, setAgentId] = useState<string>(user?.agentId || '');
+  const [newAgent, setNewAgent] = useState({ code: '', area: '', commissionRate: '5' });
   const [password, setPassword] = useState(() => (isEdit ? '' : userService.generatePassword()));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -473,8 +413,29 @@ const UserFormDialog: React.FC<{
   const takenAgentIds = new Set(users.filter((u) => u.id !== user?.id && u.agentId).map((u) => u.agentId));
   const orgAgents = agents.filter((a) => a.orgId === orgId);
   const freeAgents = orgAgents.filter((a) => !takenAgentIds.has(a.id));
+  const creatingAgent = role === 'AGENT' && agentId === NEW_AGENT;
+  const selectableOrgs = organizations.filter((o) => o.active || o.id === orgId);
+
+  // Next free numeric code, as a suggestion for a new agent record.
+  const suggestedCode = () => {
+    const numbers = orgAgents.map((a) => parseInt(a.code, 10)).filter((n) => Number.isFinite(n));
+    return String(numbers.length ? Math.max(...numbers) + 1 : 1);
+  };
+
+  // An organization without free agent records goes straight to a new one.
+  useEffect(() => {
+    if (role === 'AGENT' && orgId && !agentId && freeAgents.length === 0) {
+      setAgentId(NEW_AGENT);
+    }
+  }, [role, orgId, agentId, freeAgents.length]);
+
+  useEffect(() => {
+    if (agentId === NEW_AGENT) setNewAgent((prev) => ({ ...prev, code: prev.code || suggestedCode() }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [agentId, orgId]);
 
   const pickAgent = (id: string) => {
+    if (id === NEW_AGENT) setNewAgent({ code: suggestedCode(), area: '', commissionRate: '5' });
     setAgentId(id);
     // Prefill the name from the agent record when creating.
     const agent = agents.find((a) => a.id === id);
@@ -489,14 +450,26 @@ const UserFormDialog: React.FC<{
     e.preventDefault();
     setError(null);
     setSaving(true);
-    const input: ManagedUserInput = {
-      firstName: firstName.trim(),
-      lastName: lastName.trim(),
-      role,
-      orgId: role === 'HQ_SUPERADMIN' ? null : orgId || null,
-      agentId: role === 'AGENT' ? agentId || null : null,
-    };
+    let createdAgentId: string | null = null;
     try {
+      // The agent record is created first; it is removed again if the user cannot be saved.
+      if (creatingAgent) {
+        createdAgentId = await userService.createAgentRecord({
+          orgId,
+          code: newAgent.code,
+          fullName: `${firstName.trim()} ${lastName.trim()}`.trim(),
+          email: user?.email || email.trim(),
+          area: newAgent.area,
+          commissionRate: Number(newAgent.commissionRate.replace(',', '.')),
+        });
+      }
+      const input: ManagedUserInput = {
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        role,
+        orgId: role === 'HQ_SUPERADMIN' ? null : orgId || null,
+        agentId: role === 'AGENT' ? createdAgentId || agentId || null : null,
+      };
       if (user) {
         await userService.updateUser(user.id, input);
         onSaved();
@@ -505,6 +478,7 @@ const UserFormDialog: React.FC<{
         onSaved({ email: email.trim().toLowerCase(), password });
       }
     } catch (err: any) {
+      if (createdAgentId) await userService.deleteAgentRecord(createdAgentId);
       setError(err.message);
       setSaving(false);
     }
@@ -573,9 +547,10 @@ const UserFormDialog: React.FC<{
               <option value="" disabled>
                 Seleziona…
               </option>
-              {organizations.map((o) => (
+              {selectableOrgs.map((o) => (
                 <option key={o.id} value={o.id}>
                   {o.code} · {o.name}
+                  {o.active ? '' : ' (disattivata)'}
                 </option>
               ))}
             </select>
@@ -586,8 +561,8 @@ const UserFormDialog: React.FC<{
           <Field
             label="Scheda agente"
             hint={
-              orgId && freeAgents.length === 0
-                ? "Tutte le schede agente di questa organizzazione sono già collegate a un utente."
+              creatingAgent
+                ? 'La scheda viene creata insieme all’utente, con il suo nome e la sua email.'
                 : "L'utente vedrà i clienti assegnati a questo agente."
             }
           >
@@ -595,6 +570,7 @@ const UserFormDialog: React.FC<{
               <option value="" disabled>
                 {orgId ? 'Seleziona…' : "Scegli prima l'organizzazione"}
               </option>
+              {orgId && <option value={NEW_AGENT}>+ Nuova scheda agente</option>}
               {orgAgents.map((a) => (
                 <option key={a.id} value={a.id} disabled={takenAgentIds.has(a.id)}>
                   {a.code} · {a.fullName}
@@ -604,6 +580,36 @@ const UserFormDialog: React.FC<{
               ))}
             </select>
           </Field>
+        )}
+
+        {creatingAgent && (
+          <div className="grid grid-cols-3 gap-3 p-3 rounded-lg bg-slate-50 border border-slate-200">
+            <Field label="Codice agente">
+              <input
+                value={newAgent.code}
+                onChange={(e) => setNewAgent((prev) => ({ ...prev, code: e.target.value }))}
+                className={`${fieldClass} font-mono`}
+                maxLength={20}
+                required
+              />
+            </Field>
+            <Field label="Zona">
+              <input
+                value={newAgent.area}
+                onChange={(e) => setNewAgent((prev) => ({ ...prev, area: e.target.value }))}
+                className={fieldClass}
+              />
+            </Field>
+            <Field label="Provvigione %">
+              <input
+                value={newAgent.commissionRate}
+                onChange={(e) => setNewAgent((prev) => ({ ...prev, commissionRate: e.target.value }))}
+                className={`${fieldClass} font-mono`}
+                inputMode="decimal"
+                required
+              />
+            </Field>
+          </div>
         )}
 
         {!isEdit && (

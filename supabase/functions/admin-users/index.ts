@@ -75,6 +75,9 @@ Deno.serve(async (req) => {
 
     const caller = await getProfile(admin, auth.user.id);
     if (!caller || caller.role === 'AGENT') throw new HttpError(403, 'Non hai i permessi per gestire gli utenti.');
+    if (caller.role === 'ORG_ADMIN' && !(await isOrgActive(admin, caller.org_id))) {
+      throw new HttpError(403, 'La tua organizzazione è disattivata.');
+    }
 
     const body = await req.json().catch(() => ({}));
     switch (body.action) {
@@ -153,6 +156,12 @@ function toDto(user: User, profile: Profile | undefined) {
 }
 
 /** HQ manages everyone; a manager manages non-HQ users of their own organization. */
+async function isOrgActive(admin: SupabaseClient, orgId: string | null): Promise<boolean> {
+  if (!orgId) return false;
+  const { data } = await admin.from('organizations').select('active').eq('id', orgId).maybeSingle();
+  return Boolean(data && data.active !== false);
+}
+
 function canManage(caller: Profile, target: Profile | null | undefined): boolean {
   if (caller.role === 'HQ_SUPERADMIN') return true;
   return Boolean(target && target.role !== 'HQ_SUPERADMIN' && target.org_id === caller.org_id);
@@ -190,8 +199,9 @@ async function resolveAssignment(admin: SupabaseClient, caller: Profile, input: 
   if (role !== 'HQ_SUPERADMIN' && !orgId) throw new HttpError(400, "Seleziona l'organizzazione.");
 
   if (orgId) {
-    const { data: org } = await admin.from('organizations').select('id').eq('id', orgId).maybeSingle();
+    const { data: org } = await admin.from('organizations').select('id, active').eq('id', orgId).maybeSingle();
     if (!org) throw new HttpError(400, 'Organizzazione non trovata.');
+    if (org.active === false) throw new HttpError(400, "L'organizzazione è disattivata: riattivala prima di assegnarle utenti.");
   }
 
   let agentId: string | null = null;

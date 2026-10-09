@@ -215,15 +215,17 @@ class Store {
         return { success: false, error: 'Accesso non riuscito. Riprova.' };
       }
 
-      await this.restoreSupabaseSession(data.user);
+      const blocked = await this.restoreSupabaseSession(data.user);
+      if (blocked) return { success: false, error: blocked };
       return { success: true };
     } catch (err: any) {
       return { success: false, error: 'Impossibile contattare il servizio di accesso. Riprova tra qualche istante.' };
     }
   }
 
-  public async restoreSupabaseSession(user: any): Promise<void> {
-    if (!user || !supabase) return;
+  /** Returns an error message when the user may not enter (deactivated organization). */
+  public async restoreSupabaseSession(user: any): Promise<string | null> {
+    if (!user || !supabase) return null;
     const userEmail = user.email || '';
 
     // 1. Try fetching profile from Supabase 'profiles' table
@@ -237,6 +239,19 @@ class Store {
       profileData = pData;
     } catch (err) {
       console.warn('Could not query profiles table:', err);
+    }
+
+    // Users of a deactivated organization lose access (RLS also denies them, migration 009).
+    if (profileData?.org_id && profileData.role !== 'HQ_SUPERADMIN') {
+      const { data: org } = await supabase
+        .from('organizations')
+        .select('active')
+        .eq('id', profileData.org_id)
+        .maybeSingle();
+      if (org && org.active === false) {
+        await supabase.auth.signOut().catch(() => {});
+        return 'La tua organizzazione è stata disattivata. Contatta la sede centrale.';
+      }
     }
 
     // 2. Try fetching from 'sales_agents' table
@@ -305,6 +320,7 @@ class Store {
 
     // Sync remote data permitted by user's RLS role
     this.syncFromSupabase();
+    return null;
   }
 
   public async logout(): Promise<void> {

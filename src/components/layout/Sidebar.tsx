@@ -15,6 +15,7 @@ import {
   ChevronRight,
   Target,
   UserCog,
+  Building2,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -45,6 +46,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'visits', label: 'Visite & CRM', icon: CalendarCheck },
     { id: 'commissions', label: 'Provvigioni', icon: TrendingUp },
     { id: 'analytics', label: 'Statistiche', icon: BarChart3 },
+    ...(currentProfile.role === 'HQ_SUPERADMIN' ? [{ id: 'admin-orgs', label: 'Organizzazioni', icon: Building2 }] : []),
     ...(currentProfile.role !== 'AGENT' ? [{ id: 'admin-users', label: 'Utenti e accessi', icon: UserCog }] : []),
     { id: 'admin-erp', label: 'Sede Centrale & Hub ERP', icon: Server, isHq: true },
   ];
