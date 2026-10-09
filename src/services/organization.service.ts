@@ -15,6 +15,15 @@ export interface OrganizationInput {
   erpEndpoint: string;
 }
 
+/** ERP connectors an organization can use (same values as the CHECK in migration 010). */
+export const ERP_CONNECTORS: { value: Organization['erpConnectorType']; label: string }[] = [
+  { value: 'ESOLVER_REST', label: 'Sistemi - RestAPI - Esolver' },
+  { value: 'GENERIC_REST', label: 'Gateway REST generico' },
+];
+
+export const connectorLabel = (type: string): string =>
+  ERP_CONNECTORS.find((c) => c.value === type)?.label || type.replace(/_/g, ' ');
+
 const UNAVAILABLE = 'Servizio non disponibile: serve la connessione al database.';
 
 export class OrganizationService {

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { organizationService, OrganizationInput } from '../../services/organization.service';
+import { organizationService, OrganizationInput, ERP_CONNECTORS, connectorLabel } from '../../services/organization.service';
 import { Organization } from '../../types';
 import { Field, IconButton, Modal, fieldClass } from './ui';
 import {
@@ -19,11 +19,6 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 
-const CONNECTORS: { value: Organization['erpConnectorType']; label: string }[] = [
-  { value: 'GENERIC_REST', label: 'Gateway REST generico' },
-  { value: 'SAP_BUSINESS_ONE', label: 'SAP Business One (Service Layer)' },
-];
-
 const EMPTY_INPUT: OrganizationInput = {
   code: '',
   name: '',
@@ -33,7 +28,7 @@ const EMPTY_INPUT: OrganizationInput = {
   address: '',
   city: '',
   province: '',
-  erpConnectorType: 'GENERIC_REST',
+  erpConnectorType: 'ESOLVER_REST',
   erpEndpoint: '',
 };
 
@@ -248,7 +243,7 @@ export const OrganizationsView: React.FC<OrganizationsViewProps> = ({ organizati
                         )}
                       </span>
                     )}
-                    <span className="text-slate-500">{CONNECTORS.find((c) => c.value === o.erpConnectorType)?.label}</span>
+                    <span className="text-slate-500">{connectorLabel(o.erpConnectorType)}</span>
                     {!o.active && (
                       <span className="inline-flex items-center px-2 py-0.5 rounded-md font-semibold bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-200">
                         Disattivata
@@ -461,7 +456,7 @@ const OrganizationFormDialog: React.FC<{
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Field label="Connettore ERP">
             <select value={input.erpConnectorType} onChange={set('erpConnectorType')} className={fieldClass}>
-              {CONNECTORS.map((c) => (
+              {ERP_CONNECTORS.map((c) => (
                 <option key={c.value} value={c.value}>
                   {c.label}
                 </option>

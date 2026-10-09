@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { store } from '../../lib/store';
+import { connectorLabel } from '../../services/organization.service';
 import { Search, Menu, LogOut, ChevronDown, ChevronsUpDown, Check, Building2 } from 'lucide-react';
 import { ThemeToggle } from '../common/ThemeToggle';
 
@@ -53,7 +54,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCommand, onToggleSidebar, 
     (currentProfile.firstName?.charAt(0) || '') + (currentProfile.lastName?.charAt(0) || '')
   ).toUpperCase() || 'U';
   const roleLabel = ROLE_LABELS[currentProfile.role] || currentProfile.role;
-  const erpName = activeOrg.erpConnectorType.replace(/_/g, ' ');
+  const erpName = connectorLabel(activeOrg.erpConnectorType);
   const canSwitchOrg = (state.organizations?.length || 0) > 1;
 
   return (

@@ -45,7 +45,7 @@ export interface Organization {
   address: string;
   city: string;
   province: string;
-  erpConnectorType: 'SAP_BUSINESS_ONE' | 'GENERIC_REST';
+  erpConnectorType: 'ESOLVER_REST' | 'GENERIC_REST';
   erpEndpoint: string;
   erpStatus: 'CONNECTED' | 'SYNCING' | 'ERROR' | 'OFFLINE';
   erpLastSync: string;

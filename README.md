@@ -7,7 +7,7 @@ Soluzione SaaS multi-tenant per agenti commerciali (persone fisiche) collegata a
 ## 1. Architettura a 3 Livelli (SaaS Multi-tenant)
 
 1. **Sede Centrale (HQ SuperAdmin)**: Gestione globale delle organizzazioni (aziende clienti del servizio SaaS), monitoraggio connettori ERP, audit trail e configurazioni di fatturazione del servizio.
-2. **Organizzazioni / Aziende Clienti (Tenant B2B)**: Ogni azienda possiede i propri connettori ERP (es. SAP Business One, REST Gateway), catalogo, listini, depositi magazzino e la propria rete di agenti commerciali.
+2. **Organizzazioni / Aziende Clienti (Tenant B2B)**: Ogni azienda possiede i propri connettori ERP (es. Sistemi - RestAPI - Esolver, gateway REST generico), catalogo, listini, depositi magazzino e la propria rete di agenti commerciali.
 3. **Agenti Commerciali (Persone Fisiche)**: Ogni agente ha il proprio accesso dedicato protetto da Row Level Security (RLS). Visualizza esclusivamente i clienti assegnati, catalogo con listini netti, disponibilità tra depositi, carrello ordini, scadenziario partite aperte con registrazione incassi sul posto, visite CRM e provvigioni maturate.
 
 ---
@@ -24,7 +24,7 @@ Soluzione SaaS multi-tenant per agenti commerciali (persone fisiche) collegata a
 - **Visite & CRM**: Registrazione appuntamenti, esiti e promemoria ricontatto.
 - **Provvigioni**: Estratto conto provvigionale (Maturato, Da Liquidare, Liquidato) con export Excel/CSV.
 - **Statistiche**: Grafici di performance e concentrazione portafoglio.
-- **Sede Centrale & Hub ERP**: Test connettore (SAP, REST), sincronizzazione bidirezionale forzata in tempo reale e registro audit log.
+- **Sede Centrale & Hub ERP**: Test connettore (Esolver, REST), sincronizzazione bidirezionale forzata in tempo reale e registro audit log.
 - **Command Palette rapida**: Attivabile con `Cmd + K` o `Ctrl + K`.
 
 ---

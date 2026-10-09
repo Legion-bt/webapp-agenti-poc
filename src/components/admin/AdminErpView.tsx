@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { store } from '../../lib/store';
-import { organizationService } from '../../services/organization.service';
+import { organizationService, ERP_CONNECTORS, connectorLabel } from '../../services/organization.service';
 import { getDatabaseStatus, testSupabaseConnection } from '../../lib/supabase/client';
 import {
   Server,
@@ -98,7 +98,7 @@ export const AdminErpView: React.FC = () => {
               Sede Centrale & Hub di Interconnessione ERP
             </h1>
             <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
-              Pannello amministrativo per la gestione centralizzata delle aziende tenant, configurazione dei connettori gestionali (SAP, REST) e monitoraggio dei flussi bidirezionali di ordini, fidi e partitari.
+              Pannello amministrativo per la gestione centralizzata delle aziende tenant, configurazione dei connettori gestionali (Esolver, REST) e monitoraggio dei flussi bidirezionali di ordini, fidi e partitari.
             </p>
           </div>
 
@@ -147,7 +147,7 @@ export const AdminErpView: React.FC = () => {
             Possiede il proprio connettore gestionale ERP, catalogo dedicato, listini e coordina la propria rete agenti.
           </p>
           <div className="text-3xs font-mono text-blue-700 bg-blue-50 p-2 rounded border border-blue-200">
-            Connettore: {activeOrg.erpConnectorType} • {activeOrg.agentsCount} agenti attivi
+            Connettore: {connectorLabel(activeOrg.erpConnectorType)} • {activeOrg.agentsCount} agenti attivi
           </div>
         </div>
 
@@ -297,8 +297,11 @@ export const AdminErpView: React.FC = () => {
                 onChange={(e) => setConnectorType(e.target.value as any)}
                 className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 font-semibold text-slate-800"
               >
-                <option value="SAP_BUSINESS_ONE">SAP Business One (Service Layer OData)</option>
-                <option value="GENERIC_REST">Custom ERP Webhook / REST Gateway</option>
+                {ERP_CONNECTORS.map((c) => (
+                  <option key={c.value} value={c.value}>
+                    {c.label}
+                  </option>
+                ))}
               </select>
             </div>
 

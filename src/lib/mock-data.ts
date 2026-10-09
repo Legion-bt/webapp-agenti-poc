@@ -47,7 +47,7 @@ export const INITIAL_ORGANIZATIONS: Organization[] = [
     address: 'Viale dei Cipressi, 15',
     city: 'Collemiro',
     province: 'XD',
-    erpConnectorType: 'SAP_BUSINESS_ONE',
+    erpConnectorType: 'ESOLVER_REST',
     erpEndpoint: 'https://erp-gateway.example/v2/collemiro',
     erpStatus: 'CONNECTED',
     erpLastSync: '2026-10-07 07:45:00',

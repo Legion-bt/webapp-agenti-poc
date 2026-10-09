@@ -75,12 +75,15 @@ al posto dello store locale.
   Pagina "Organizzazioni" (`OrganizationsView.tsx`, solo HQ) per creare/modificare/disattivare e
   creare il listino base; in "Utenti e accessi" la scheda agente si crea insieme all'utente
   (`userService.createAgentRecord`). Componenti comuni delle pagine admin in `admin/ui.tsx`.
+- `010` (da applicare): connettori ERP ammessi `ESOLVER_REST` ("Sistemi - RestAPI - Esolver",
+  integrazione reale prevista, richiesta dall'utente) e `GENERIC_REST`; elenco in
+  `ERP_CONNECTORS` (`organization.service.ts`), vincolo CHECK sul DB.
 - Immagini articoli: solo nel bucket privato `product-images` (path in `products.image_url`,
   URL firmati da `product-image.service.ts`); senza immagine si mostra un'illustrazione
   disegnata in `ProductImage.tsx`. Niente immagini, font o altre risorse da URL esterni
   (i font sono pacchetti `@fontsource`).
 - **Dati demo solo inventati**: niente nomi di persone, aziende, luoghi (località e sigle provincia
-  fittizie XA–XE, CAP 99xxx), banche, denominazioni di vini o documenti reali, né marchi di gestionali
+  fittizie XA–XE, CAP 99xxx), banche, denominazioni di vini o documenti reali, né marchi di gestionali (unica eccezione voluta dall'utente: il connettore Esolver di Sistemi)
   (l'export di AI Studio li conteneva ed è stato ripulito). Gli unici dati reali sono gli utenti
   di login creati dall'utente: non modificarli.
   La Edge Function è esclusa dal `tsc` del progetto (è codice Deno).
