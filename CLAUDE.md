@@ -70,7 +70,7 @@ al posto dello store locale.
   su Supabase da `order.service.ts` / `store.syncOrders()`. Provvigioni, giacenze, preventivi e
   visite restano dati demo locali. `005`, `006`, `007` (anonimizzazione dati demo) e `008` (bucket privato
   `product-images`, RPC `set_product_image`) applicate.
-- `009` (da applicare): organizzazioni non eliminabili, solo disattivabili (`active`); con
+- `009` (applicata; `admin-users` ripubblicata): organizzazioni non eliminabili, solo disattivabili (`active`); con
   organizzazione disattivata `app_role()` restituisce NULL e il login viene rifiutato.
   Pagina "Organizzazioni" (`OrganizationsView.tsx`, solo HQ) per creare/modificare/disattivare e
   creare il listino base; in "Utenti e accessi" la scheda agente si crea insieme all'utente
