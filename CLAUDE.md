@@ -26,7 +26,7 @@ La specifica chiede TanStack Start + TanStack Router/Query + Radix/shadcn + reac
 - **Nessun router**: la navigazione è uno `useState` in `src/App.tsx` (`currentView` +
   `selectedEntityId`), quindi niente URL per le pagine.
 - **Dati in memoria**: `src/lib/store.ts` è uno store globale (pattern subscribe) inizializzato
-  da `src/lib/mock-data.ts` e persistito in `localStorage` (`agentego_erp_database_v1`).
+  da `src/lib/mock-data.ts` e persistito in `localStorage` (`agentego_erp_database_v2`).
   I service in `src/services/*.service.ts` leggono e scrivono lo store, **non Supabase**.
 - **Supabase è usato solo per**: login email/password (`store.loginWithSupabase`), lettura di
   `profiles` / `sales_agents` per il ruolo, test di connessione in `AdminErpView`.

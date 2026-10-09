@@ -35,7 +35,15 @@ import {
   INITIAL_ERP_LOGS,
 } from './mock-data';
 
-const STORAGE_KEY = 'agentego_erp_database_v1';
+// v2: anonymized demo data; drops the copy cached by older versions.
+const STORAGE_KEY = 'agentego_erp_database_v2';
+if (typeof localStorage !== 'undefined') {
+  try {
+    localStorage.removeItem('agentego_erp_database_v1');
+  } catch {
+    /* storage unavailable */
+  }
+}
 
 export interface AppState {
   organizations: Organization[];
