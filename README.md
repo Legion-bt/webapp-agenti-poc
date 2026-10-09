@@ -1,82 +1,200 @@
-# AgenteGo ERP — WebApp B2B per Agenti Commerciali & Hub Multi-tenant
+# AgenteGo
 
-Soluzione SaaS multi-tenant per agenti commerciali (persone fisiche) collegata a gestionale ERP, con backend relazionale PostgreSQL su Supabase e pannello di amministrazione centralizzato per gestire i dati sincronizzati.
+**La webapp per gli agenti di commercio B2B.** Dal telefono o dal PC l'agente trova i suoi
+clienti, controlla prezzi e disponibilità e inserisce l'ordine; la sede e i manager gestiscono
+aziende, utenti e accessi. Una sola installazione serve più aziende, ciascuna con il proprio
+collegamento al gestionale.
 
----
+> **Stato: prototipo funzionante (POC).** Accessi, clienti, catalogo e ordini lavorano su dati
+> reali in Supabase; preventivi, scadenzario, visite, provvigioni e statistiche usano ancora
+> dati dimostrativi, in attesa del collegamento al gestionale. Tutti i dati demo sono inventati.
 
-## 1. Architettura a 3 Livelli (SaaS Multi-tenant)
-
-1. **Sede Centrale (HQ SuperAdmin)**: Gestione globale delle organizzazioni (aziende clienti del servizio SaaS), monitoraggio connettori ERP, audit trail e configurazioni di fatturazione del servizio.
-2. **Organizzazioni / Aziende Clienti (Tenant B2B)**: Ogni azienda possiede i propri connettori ERP (es. Sistemi - RestAPI - Esolver, gateway REST generico), catalogo, listini, depositi magazzino e la propria rete di agenti commerciali.
-3. **Agenti Commerciali (Persone Fisiche)**: Ogni agente ha il proprio accesso dedicato protetto da Row Level Security (RLS). Visualizza esclusivamente i clienti assegnati, catalogo con listini netti, disponibilità tra depositi, carrello ordini, scadenziario partite aperte con registrazione incassi sul posto, visite CRM e provvigioni maturate.
-
----
-
-## 2. Pagine e Funzionalità Implementate
-
-- **Dashboard**: KPI fatturato mese vs target (€35.000), fatturato YTD (+14.2%), ordini in corso, provvigioni maturate, andamento vendite 12 mesi comparato (SVG interattivo), top clienti e visite del giorno.
-- **Clienti**: Anagrafica con filtri zona, fido concesso, esposizione creditizia e partite scadute. Scheda cliente con 6 tab (Panoramica, Storico Ordini, Sospesi & Partite Aperte, Listino & Prezzi Dedicati, Visite & Note CRM, Scheda Anagrafica Fiscale ERP con SDI e IBAN).
-- **Sospesi & Incassi** *(replica screenshot)*: Scadenziario partite aperte con calcolo dello scaduto (€92.415,30), visualizzazione saldo, e pulsante **"Inserisci Incasso"** per registrare assegni/bonifici sul campo che riallineano immediatamente la posizione contabile.
-- **Catalogo Prodotti** *(replica screenshot)*: Griglia visuale con foto bottiglie/articoli, codici e moltiplicatori packaging (es. `RRIS075 | 12 BT x CA12`, `OLEXT075 | 1 ST x BT`), sconti base applicati, dot di disponibilità reale e giacenze tra depositi (Valdoro Centrale, Porto Selene, Isola Grande).
-- **Nuovo Ordine** *(replica screenshot)*: Testata documento (Cliente `VERDEMARE FORNITURE SPA`, Agente `3 FERRARESI DAVIDE`, causale `OV - ORDINI CLIENTI`, consegna richiesta), banner di allerta arancione in caso di fido superato o insoluti, pricing engine multilivello e invio con registrazione codice (es. `2026-OV-0000037`).
-- **Storico Ordini** *(replica screenshot)*: Elenco documenti B2B con pallini stato colorati (verde, arancione, rosso), riferimenti seriali, residui, back-order e timeline interattiva a 5 fasi: `Inserito` ➔ `Confermato` ➔ `In Preparazione` ➔ `Spedito` ➔ `Fatturato`.
-- **Preventivi**: Offerte con pulsante one-click **"Converti in Ordine"** (Specifica Sez. 14).
-- **Visite & CRM**: Registrazione appuntamenti, esiti e promemoria ricontatto.
-- **Provvigioni**: Estratto conto provvigionale (Maturato, Da Liquidare, Liquidato) con export Excel/CSV.
-- **Statistiche**: Grafici di performance e concentrazione portafoglio.
-- **Sede Centrale & Hub ERP**: Test connettore (Esolver, REST), sincronizzazione bidirezionale forzata in tempo reale e registro audit log.
-- **Command Palette rapida**: Attivabile con `Cmd + K` o `Ctrl + K`.
+Produzione: <https://agentego-poc.vercel.app>
 
 ---
 
-## 3. Account Demo & Quick Switcher
+## Indice
 
-Per testare istantaneamente tutti e tre i livelli della gerarchia, è disponibile un selettore rapido in alto a destra nella barra di navigazione:
-
-- **Agente di Vendita**: `Davide Ferraresi` (`agente@example.local`) — Codice Agente 3, Area Porto Selene & Rocca Ventosa.
-- **Sales Manager Organizzazione**: `Dott. Fabio Riccardi` (`manager@example.local`) — Direzione Commerciale.
-- **Sede Centrale SuperAdmin**: `Direzione Sede Centrale` (`admin@example.local`) — Amministrazione globale multi-tenant.
+- [Cosa fa](#cosa-fa)
+- [Ruoli](#ruoli)
+- [Funzioni e stato](#funzioni-e-stato)
+- [Architettura](#architettura)
+- [Avvio in locale](#avvio-in-locale)
+- [Supabase](#supabase)
+- [Deploy](#deploy)
+- [Sicurezza](#sicurezza)
+- [Struttura del progetto](#struttura-del-progetto)
+- [Documentazione](#documentazione)
+- [Prossimi passi](#prossimi-passi)
 
 ---
 
-## 4. Prerequisiti & Avvio Locale
+## Cosa fa
 
-### Prerequisiti
-- Node.js >= 18
-- npm >= 9
+Il flusso centrale, sempre funzionante, è quello dell'agente:
 
-### Installazione dipendenze
+1. **Accesso** con email e password fornite dall'azienda.
+2. **Cliente:** ricerca, scheda con anagrafica, destinazioni, fido, esposizione, scaduto, ordini e documenti PDF.
+3. **Articolo:** catalogo con foto, codici, confezioni e promozioni.
+4. **Prezzo:** calcolato dal listino del cliente, con prezzi speciali e sconti a cascata.
+5. **Disponibilità:** giacenza per magazzino e avviso se non basta.
+6. **Ordine:** totali e IVA; con fido superato o insoluti l'ordine viene salvato come bloccato, con il motivo.
+7. **Stato ordine:** inviato, confermato, in preparazione, spedito, fatturato, bloccato, annullato.
+
+## Ruoli
+
+| Ruolo | Vede | Può |
+|---|---|---|
+| **Agente** | Solo i clienti assegnati alla sua scheda agente, con ordini e documenti | Consultare clienti e catalogo, inserire ordini e preventivi, registrare visite e incassi |
+| **Manager** | Clienti, agenti e ordini della propria azienda | Quanto l'agente, più gestire utenti (manager e agenti) e immagini degli articoli della sua azienda |
+| **Sede centrale** | Tutte le aziende | Creare e disattivare aziende, gestire tutti gli utenti, configurare il connettore del gestionale |
+
+I permessi sono applicati dal database (Row Level Security), non solo dall'interfaccia.
+
+## Funzioni e stato
+
+| Area | Cosa fa | Stato |
+|---|---|---|
+| Accesso | Login, sessione, tema chiaro/scuro | ✅ Operativa |
+| Clienti | Elenco e scheda cliente | ✅ Operativa |
+| Documenti cliente | PDF allegati al cliente, in archivio privato | ✅ Operativa |
+| Catalogo articoli | Griglia con ricerca e filtri | ✅ Operativa |
+| Immagini articoli | Upload da sede e manager in bucket privato; illustrazione automatica se manca | ✅ Operativa |
+| Nuovo ordine | Carrello, controllo disponibilità e fido, blocco automatico | ✅ Operativa (prezzi da gateway ERP simulato) |
+| Storico ordini | Elenco, dettaglio, avanzamento di stato | ✅ Operativa |
+| Utenti e accessi | Creazione utenti, ruoli, password, disattivazione; scheda agente creata con l'utente | ✅ Operativa |
+| Organizzazioni | Creazione, modifica, disattivazione aziende; listino base | ✅ Operativa |
+| Preventivi | Creazione e conversione in ordine | 🧪 Dimostrativa |
+| Sospesi e incassi | Scadenzario e registrazione incassi | 🧪 Dimostrativa |
+| Visite e CRM | Agenda, esiti, promemoria | 🧪 Dimostrativa |
+| Provvigioni | Maturate, da liquidare, liquidate | 🧪 Dimostrativa |
+| Dashboard e statistiche | Obiettivi, fatturato, andamenti | 🧪 Dimostrativa |
+| Sede centrale e hub ERP | Stato connettore, sincronizzazioni, registro | 🧪 Dimostrativa (gestionale simulato) |
+
+Ricerca rapida su clienti, articoli e ordini con `Ctrl+K`; interfaccia adattata al telefono.
+
+## Architettura
+
+```
+Browser (SPA React)
+   │  login, letture e scritture con il token dell'utente
+   ▼
+Supabase ── Auth ─ ruoli in public.profiles
+   ├── Postgres ─ dati per azienda, Row Level Security per ruolo, RPC (es. create_order)
+   ├── Storage ─ bucket privati: customer-documents (PDF), product-images (JPEG/PNG/WebP)
+   └── Edge Function admin-users ─ gestione utenti con la chiave segreta, solo lato server
+         │
+         ▼ (in progetto)
+Gestionale ERP ─ connettori: "Sistemi - RestAPI - Esolver", gateway REST generico
+```
+
+| Componente | Tecnologia |
+|---|---|
+| Frontend | Vite 8, React 19, TypeScript, Tailwind CSS v4, lucide-react, motion |
+| Backend | Supabase: Postgres, Auth, Storage, Edge Functions (Deno) |
+| Hosting | Vercel (statico) |
+| Font | Inclusi nel bundle (`@fontsource`), nessuna risorsa esterna |
+
+Il confine verso il gestionale è l'interfaccia `ErpGateway` in `src/services/erp-gateway.ts`
+(oggi implementata da `SimulatedErpGateway`).
+
+## Avvio in locale
+
+Prerequisiti: [Bun](https://bun.sh) (il progetto usa `bun.lock`).
+
 ```bash
-npm install
+bun install
+cp .env.example .env.local   # poi inserire URL e chiave publishable di Supabase
+bun run dev                  # http://localhost:3000
 ```
 
-### Avvio Server di Sviluppo
+| Comando | Cosa fa |
+|---|---|
+| `bun run dev` | Server di sviluppo Vite sulla porta 3000 |
+| `bun run build` | Build di produzione in `dist/` (+ `server.js`) |
+| `bun run lint` | Controllo dei tipi (`tsc --noEmit`) |
+| `bun run preview` | Anteprima della build |
+
+Variabili lette dal client (`.env.local`, mai committato):
+
+| Variabile | Descrizione |
+|---|---|
+| `VITE_SUPABASE_URL` | URL del progetto Supabase |
+| `VITE_SUPABASE_ANON_KEY` o `VITE_SUPABASE_PUBLISHABLE_KEY` | Chiave publishable (non segreta) |
+
+Senza Supabase configurato l'app mostra i dati dimostrativi salvati nel browser.
+
+## Supabase
+
+Le modifiche al database sono migrazioni numerate in `supabase/migrations/`, da eseguire in
+ordine nel SQL Editor. Un file già applicato non si riscrive: ogni cambiamento è un file nuovo.
+
+| Migrazione | Contenuto |
+|---|---|
+| `001` | Schema iniziale |
+| `002` | Profili e ruoli, RLS per ruolo, documenti PDF dei clienti (bucket privato) |
+| `003` | Dati demo (organizzazioni, agenti, clienti) |
+| `004` | Collegamento utente ↔ scheda agente |
+| `005` | Ordini: righe, RPC `create_order`, numerazione lato server |
+| `006` | Dati ERP neutri |
+| `007` | Anonimizzazione completa dei dati demo |
+| `008` | Immagini articoli in bucket privato, RPC `set_product_image` |
+| `009` | Organizzazioni disattivabili (non eliminabili), accesso negato agli utenti di aziende disattivate |
+| `010` | Connettori ERP ammessi: `ESOLVER_REST`, `GENERIC_REST` |
+
+**Edge Function `admin-users`** (`supabase/functions/admin-users`): crea, modifica, disattiva
+ed elimina gli utenti con la chiave segreta, che resta sul server. Va pubblicata dal dashboard
+Supabase (Edge Functions → editor, *Verify JWT* disattivato: il controllo del token è nel codice)
+e ripubblicata a mano dopo ogni modifica.
+
+## Deploy
+
 ```bash
-npm run dev
+vercel deploy --prod --yes
 ```
 
-Il server sarà accessibile all'indirizzo `http://localhost:3000`.
+Su Vercel servono solo le variabili `VITE_SUPABASE_*`. La chiave segreta di Supabase non va
+mai su Vercel né nel codice client.
 
-### Build di Produzione
-```bash
-npm run build
+## Sicurezza
+
+- Permessi per ruolo applicati da Postgres (RLS) e dalle funzioni `SECURITY DEFINER`.
+- Operazioni privilegiate (utenti) solo nella Edge Function, con verifica del ruolo di chi chiama.
+- Documenti e immagini in bucket privati, letti con URL firmati a scadenza.
+- Nessuna immagine, font o script da domini esterni.
+- Dati demo interamente inventati: nessuna persona, azienda, luogo, banca o prodotto reale.
+- File con credenziali (`.env.local`, `supabase_progetto.txt`) esclusi da git.
+
+## Struttura del progetto
+
+```
+src/
+  App.tsx                 navigazione tra le viste
+  components/             viste per area (customers, catalog, orders, admin, …)
+  services/               logica applicativa e accesso a Supabase (mai SQL nei componenti)
+  lib/store.ts            stato globale e sincronizzazione da Supabase
+  lib/mock-data.ts        dati dimostrativi
+  types/                  tipi condivisi
+supabase/
+  migrations/             migrazioni numerate
+  functions/admin-users/  Edge Function gestione utenti
+.integrazioni/            analisi delle integrazioni (eSolver, Telegram, OCR)
+scripts/                  script di supporto (seed, test di connessione)
 ```
 
----
+## Documentazione
 
-## 5. Backend Supabase & PostgreSQL
+| Documento | Contenuto |
+|---|---|
+| [`CLAUDE.md`](CLAUDE.md) | Regole e stato del progetto per lo sviluppo |
+| [`ERP_Sales_Agent_WebApp_INIT.md`](ERP_Sales_Agent_WebApp_INIT.md) | Specifica funzionale di riferimento |
+| [`.integrazioni/esolver/`](.integrazioni/esolver/) | Integrazione con eSolver: brief del backend, analisi, stima, registro scambi |
+| [`.integrazioni/estensioni/telegram-e-ocr.md`](.integrazioni/estensioni/telegram-e-ocr.md) | Estensioni Telegram e OCR |
 
-Il progetto include le migrazioni PostgreSQL e i dati di seed pronti:
-- `supabase/migrations/001_initial_schema.sql` (Tabelle multi-tenant con Row Level Security)
-- `supabase/seed.sql` (Dataset italiano con clienti, articoli, listini, partite aperte e ordini)
+## Prossimi passi
 
-### Configurazione variabili d'ambiente (`.env`):
-```env
-VITE_SUPABASE_URL=https://your-project-id.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key-placeholder
-VITE_ERP_CONNECTOR_TYPE=generic_rest
-VITE_ERP_ENDPOINT=https://erp.enterprise.example/api/v2
-VITE_ERP_SYNC_INTERVAL_SEC=300
-```
-
-Se le credenziali Supabase non sono ancora impostate, l'applicazione attiva automaticamente il motore reattivo **Local Demo Engine**, garantendo persistenza locale, calcolo prezzi e test completo di tutte le funzionalità.
+- **Integrazione eSolver:** lettura di clienti, articoli, giacenze e stato ordini; invio degli
+  ordini. Le scelte sono in attesa di decisione (vedi `.integrazioni/esolver/02_analisi-e-stima.md`).
+- **Aree da rendere operative:** preventivi, scadenzario e incassi, visite, provvigioni, statistiche.
+- **Prezzi e fido lato server**, quando il gestionale li fornirà.
+- **Estensioni:** avvisi e canale Telegram, ordini da documento (OCR).
