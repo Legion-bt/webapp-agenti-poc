@@ -32,7 +32,7 @@ La specifica chiede TanStack Start + TanStack Router/Query + Radix/shadcn + reac
   `profiles` / `sales_agents` per il ruolo, test di connessione in `AdminErpView`.
 - Ruoli nel codice: `HQ_SUPERADMIN`, `ORG_ADMIN`, `AGENT` (multi-tenant con `organizations`);
   la specifica parla di `ADMIN`, `SALES_MANAGER`, `AGENT`.
-- `src/services/erp-gateway.ts` definisce l'interfaccia `ErpGateway` (impl. `ApraErpGateway`
+- `src/services/erp-gateway.ts` definisce l'interfaccia `ErpGateway` (impl. `SimulatedErpGateway`
   simulata): è il confine ERP richiesto dalla specifica §33, da mantenere.
 
 Decisioni ancora aperte (chiedere all'utente, non procedere da soli): migrare allo stack della

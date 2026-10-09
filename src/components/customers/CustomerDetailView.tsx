@@ -292,7 +292,7 @@ export const CustomerDetailView: React.FC<CustomerDetailViewProps> = ({
           <div className="bg-slate-50 border-t border-slate-200 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
             <div className="flex items-center gap-2 text-slate-600 font-sans">
               <ShieldAlert className="w-4 h-4 text-amber-600" />
-              <span>Dati sincronizzati dal giornale partitari Apra ERP</span>
+              <span>Dati sincronizzati dal giornale partitari ERP</span>
             </div>
 
             <div className="flex items-center gap-6 font-mono">
@@ -322,7 +322,7 @@ export const CustomerDetailView: React.FC<CustomerDetailViewProps> = ({
         <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-2xs space-y-6">
           <div className="border-b border-slate-200 pb-3">
             <h2 className="text-base font-bold text-slate-900">
-              Dati Anagrafici e Fiscali ERP (Apra)
+              Dati Anagrafici e Fiscali ERP
             </h2>
             <p className="text-xs text-slate-500">
               Informazioni di fatturazione elettronica, condizioni bancarie e recapiti di consegna.

@@ -111,7 +111,7 @@ export const SuspendedView: React.FC<SuspendedViewProps> = ({ onNavigate }) => {
       <div className="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
         <div className="bg-slate-900 text-white px-5 py-3 flex items-center justify-between">
           <span className="text-xs font-bold uppercase tracking-wider">
-            Giornale Scadenziario Apra ERP
+            Giornale Scadenziario ERP
           </span>
           <span className="text-3xs text-slate-400 font-mono">
             Riallineato con contabilità generale

@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS public.organizations (
     address VARCHAR(255),
     city VARCHAR(100),
     province VARCHAR(50),
-    erp_connector_type VARCHAR(50) DEFAULT 'APRA_ERP',
+    erp_connector_type VARCHAR(50) DEFAULT 'GENERIC_REST',
     erp_endpoint TEXT,
     erp_status VARCHAR(20) DEFAULT 'CONNECTED',
     erp_last_sync TIMESTAMPTZ DEFAULT NOW(),
@@ -284,8 +284,8 @@ VALUES (
     'Via dell''Artigianato, 42',
     'Jesi',
     'AN',
-    'APRA_ERP',
-    'https://erp-gw.apra.it/v2/marchigiani',
+    'GENERIC_REST',
+    'https://erp-gateway.example/v2/marchigiani',
     'CONNECTED'
 ) ON CONFLICT (code) DO NOTHING;
 
@@ -337,7 +337,7 @@ INSERT INTO public.customers (
     'IT01948290419',
     'RSSVNT78M19C573K',
     '0000000',
-    'a.consalvo@apra.it',
+    'alessandro.manoni@example.local',
     'rossivalentinospa@pec.it',
     '072197151',
     '335 8892102',

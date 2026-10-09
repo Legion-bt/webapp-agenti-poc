@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS organizations (
     address VARCHAR(255),
     city VARCHAR(100),
     province VARCHAR(50),
-    erp_connector_type VARCHAR(50) DEFAULT 'APRA_ERP',
+    erp_connector_type VARCHAR(50) DEFAULT 'GENERIC_REST',
     erp_endpoint TEXT,
     erp_status VARCHAR(20) DEFAULT 'CONNECTED',
     erp_last_sync TIMESTAMPTZ DEFAULT NOW(),

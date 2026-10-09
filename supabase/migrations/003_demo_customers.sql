@@ -15,7 +15,7 @@
 INSERT INTO public.organizations (id, code, name, legal_name, vat_number, address, city, province, erp_connector_type, erp_status)
 VALUES ('a0000000-0000-0000-0000-000000000002', 'ORG-02', 'Tenute Chianti & Olio Toscano',
         'Tenute Chianti & Olio Toscano S.r.l.', 'IT05518230487', 'Via Chiantigiana, 112', 'Greve in Chianti', 'FI',
-        'APRA_ERP', 'CONNECTED')
+        'GENERIC_REST', 'CONNECTED')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.price_lists (id, org_id, code, name)

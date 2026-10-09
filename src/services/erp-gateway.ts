@@ -19,7 +19,7 @@ export interface ErpGateway {
   submitOrder(order: Partial<Order>): Promise<{ success: boolean; erpDocNumber: string; status: string }>;
 }
 
-export class ApraErpGateway implements ErpGateway {
+export class SimulatedErpGateway implements ErpGateway {
   public async calculatePrice(input: PriceCalculationInput): Promise<PricingResult> {
     // Delegates to centralized pricing engine
     return pricingService.calculatePrice(input);
@@ -106,7 +106,7 @@ export class ApraErpGateway implements ErpGateway {
     erpDocNumber: string;
     status: string;
   }> {
-    // Simulates Apra ERP electronic document registration
+    // Simulates the ERP electronic document registration
     const year = new Date().getFullYear();
     const randomSerial = Math.floor(1000 + Math.random() * 9000);
     const erpDocNumber = `ERP-OV-${year.toString().slice(-2)}-${randomSerial}`;
@@ -137,4 +137,4 @@ export class ApraErpGateway implements ErpGateway {
   }
 }
 
-export const erpGateway: ErpGateway = new ApraErpGateway();
+export const erpGateway: ErpGateway = new SimulatedErpGateway();

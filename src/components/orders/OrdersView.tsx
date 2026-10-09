@@ -59,7 +59,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ onNavigate }) => {
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            Controllo avanzamento vendite, tracking spedizioni, back-order e sincronizzazione Apra ERP.
+            Controllo avanzamento vendite, tracking spedizioni, back-order e sincronizzazione ERP.
           </p>
         </div>
 

@@ -27,7 +27,7 @@ async function seed() {
     address: 'Via dell’Artigianato, 42',
     city: 'Jesi',
     province: 'AN',
-    erp_connector_type: 'APRA_ERP',
+    erp_connector_type: 'GENERIC_REST',
     erp_status: 'CONNECTED'
   };
   const { data: orgData, error: orgErr } = await supabase.from('organizations').upsert(org, { onConflict: 'code' }).select().single();
@@ -150,7 +150,7 @@ async function seed() {
     vat_number: 'IT01948290419',
     tax_code: 'RSSVNT78M19C573K',
     sdi_code: '0000000',
-    email: 'a.consalvo@apra.it',
+    email: 'alessandro.manoni@example.local',
     pec: 'rossivalentinospa@pec.it',
     phone: '072197151',
     mobile: '335 8892102',

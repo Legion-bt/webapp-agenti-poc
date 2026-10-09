@@ -98,7 +98,7 @@ export const AdminErpView: React.FC = () => {
               Sede Centrale & Hub di Interconnessione ERP
             </h1>
             <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
-              Pannello amministrativo per la gestione centralizzata delle aziende tenant, configurazione dei connettori gestionali (Apra ERP, SAP, Zucchetti) e monitoraggio dei flussi bidirezionali di ordini, fidi e partitari.
+              Pannello amministrativo per la gestione centralizzata delle aziende tenant, configurazione dei connettori gestionali (SAP, Zucchetti, REST) e monitoraggio dei flussi bidirezionali di ordini, fidi e partitari.
             </p>
           </div>
 
@@ -297,7 +297,6 @@ export const AdminErpView: React.FC = () => {
                 onChange={(e) => setConnectorType(e.target.value as any)}
                 className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 font-semibold text-slate-800"
               >
-                <option value="APRA_ERP">Apra ERP (B2B Document Gateway / REST v2)</option>
                 <option value="SAP_BUSINESS_ONE">SAP Business One (Service Layer OData)</option>
                 <option value="ZUCCHETTI_AD HOC">Zucchetti Ad Hoc Revolution / Enterprise</option>
                 <option value="GENERIC_REST">Custom ERP Webhook / REST Gateway</option>

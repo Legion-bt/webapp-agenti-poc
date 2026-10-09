@@ -210,7 +210,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
             })}
           </div>
           <div className="flex items-center justify-between text-2xs text-slate-400 pt-2 font-mono">
-            <span>Dati riallineati con Apra ERP alle ore 08:30</span>
+            <span>Dati riallineati con il gestionale ERP alle ore 08:30</span>
             <span>Target mensile fisso: €35.000</span>
           </div>
         </div>

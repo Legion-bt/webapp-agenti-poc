@@ -45,7 +45,7 @@ export interface Organization {
   address: string;
   city: string;
   province: string;
-  erpConnectorType: 'APRA_ERP' | 'SAP_BUSINESS_ONE' | 'ZUCCHETTI_AD HOC' | 'GENERIC_REST';
+  erpConnectorType: 'SAP_BUSINESS_ONE' | 'ZUCCHETTI_AD HOC' | 'GENERIC_REST';
   erpEndpoint: string;
   erpStatus: 'CONNECTED' | 'SYNCING' | 'ERROR' | 'OFFLINE';
   erpLastSync: string;

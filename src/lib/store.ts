@@ -357,7 +357,7 @@ class Store {
         address: o.address || '',
         city: o.city || '',
         province: o.province || '',
-        erpConnectorType: o.erp_connector_type || 'APRA_ERP',
+        erpConnectorType: o.erp_connector_type || 'GENERIC_REST',
         erpEndpoint: o.erp_endpoint || '',
         erpStatus: o.erp_status || 'CONNECTED',
         erpLastSync: o.erp_last_sync || '',

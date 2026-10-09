@@ -1,7 +1,7 @@
 -- =====================================================================
 -- SEED DATA: seed.sql
 -- Rich Italian B2B Dataset for ERP Sales Agent WebApp
--- Matching Apra ERP / B2B Screenshots
+-- Matching ERP / B2B Screenshots
 -- =====================================================================
 
 -- 1. Organization
@@ -15,8 +15,8 @@ VALUES (
     'Via dell''Artigianato, 42',
     'Jesi',
     'AN',
-    'APRA_ERP',
-    'https://erp-gw.apra.it/v2/marchigiani',
+    'GENERIC_REST',
+    'https://erp-gateway.example/v2/marchigiani',
     'CONNECTED'
 ) ON CONFLICT (code) DO NOTHING;
 
@@ -82,7 +82,7 @@ INSERT INTO customers (
     'IT01948290419',
     'RSSVNT78M19C573K',
     '0000000',
-    'a.consalvo@apra.it',
+    'alessandro.manoni@example.local',
     'rossivalentinospa@pec.it',
     '072197151',
     '335 8892102',

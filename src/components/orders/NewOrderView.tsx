@@ -185,7 +185,7 @@ export const NewOrderView: React.FC<NewOrderViewProps> = ({
         <p className="text-xs text-slate-600 leading-relaxed">
           {submissionSuccess.isBlocked
             ? 'L\'ordine è stato trasmesso a sistema ma risulta in stato BLOCCATO a causa del superamento fido o insoluti aperti del cliente. La direzione commerciale è stata notificata per lo sblocco manuale.'
-            : 'L\'ordine è stato recepito dal gateway Apra ERP, la disponibilità di magazzino è stata impegnata e la provvigione dell\'agente è stata registrata regolarmente.'}
+            : 'L\'ordine è stato recepito dal gateway ERP, la disponibilità di magazzino è stata impegnata e la provvigione dell\'agente è stata registrata regolarmente.'}
         </p>
 
         <div className="flex items-center justify-center gap-3 pt-4">
