@@ -46,7 +46,7 @@ export const NewOrderView: React.FC<NewOrderViewProps> = ({
   const [causal, setCausal] = useState<string>('OV - ORDINI CLIENTI');
   const [notes, setNotes] = useState<string>('');
   const [cart, setCart] = useState<CartItem[]>([
-    // Pre-populate with sample items matching the screenshots if customer is Rossi Valentino SpA
+    // Pre-populate with sample items matching the screenshots if customer is Verdemare Forniture SpA
     { product: allProducts[0], quantity: 12 },
     { product: allProducts[1], quantity: 24 },
   ]);
@@ -289,7 +289,7 @@ export const NewOrderView: React.FC<NewOrderViewProps> = ({
               Codice Agente Incaricato
             </label>
             <div className="p-2 bg-slate-100 border border-slate-200 rounded-lg text-slate-800 font-mono text-xs font-bold">
-              3 — MANONI ALESSANDRO
+              3 — FERRARESI DAVIDE
             </div>
           </div>
 

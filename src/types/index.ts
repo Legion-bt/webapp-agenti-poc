@@ -45,7 +45,7 @@ export interface Organization {
   address: string;
   city: string;
   province: string;
-  erpConnectorType: 'SAP_BUSINESS_ONE' | 'ZUCCHETTI_AD HOC' | 'GENERIC_REST';
+  erpConnectorType: 'SAP_BUSINESS_ONE' | 'GENERIC_REST';
   erpEndpoint: string;
   erpStatus: 'CONNECTED' | 'SYNCING' | 'ERROR' | 'OFFLINE';
   erpLastSync: string;
@@ -74,7 +74,7 @@ export interface Customer {
   id: string;
   orgId: string;
   code: string; // e.g. '000030'
-  businessName: string; // e.g. 'ROSSI VALENTINO SPA'
+  businessName: string; // e.g. 'VERDEMARE FORNITURE SPA'
   vatNumber: string;
   taxCode: string;
   sdiCode: string; // e.g. '0000000'

@@ -68,7 +68,10 @@ al posto dello store locale.
   dal dashboard (Via Editor, Verify JWT disattivato): dopo ogni modifica va ripubblicata a mano.
 - `005` (ordini: order_items, RPC `create_order`, numerazione lato server): ordini letti e scritti
   su Supabase da `order.service.ts` / `store.syncOrders()`. Provvigioni, giacenze, preventivi e
-  visite restano dati demo locali.
+  visite restano dati demo locali. `005` e `006` applicate; `007` (anonimizzazione dati demo) da applicare.
+- **Dati demo solo inventati**: niente nomi di persone o aziende reali, né marchi di gestionali
+  (l'export di AI Studio li conteneva ed è stato ripulito). Gli unici dati reali sono gli utenti
+  di login creati dall'utente: non modificarli.
   La Edge Function è esclusa dal `tsc` del progetto (è codice Deno).
 - Regole per lo schema (stesse di ShiftOps): ogni nuova tabella in `public` con GRANT espliciti,
   RLS abilitata e policy separate per select/insert/update/delete; ruoli in tabella dedicata,

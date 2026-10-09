@@ -98,7 +98,7 @@ export const AdminErpView: React.FC = () => {
               Sede Centrale & Hub di Interconnessione ERP
             </h1>
             <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
-              Pannello amministrativo per la gestione centralizzata delle aziende tenant, configurazione dei connettori gestionali (SAP, Zucchetti, REST) e monitoraggio dei flussi bidirezionali di ordini, fidi e partitari.
+              Pannello amministrativo per la gestione centralizzata delle aziende tenant, configurazione dei connettori gestionali (SAP, REST) e monitoraggio dei flussi bidirezionali di ordini, fidi e partitari.
             </p>
           </div>
 
@@ -158,7 +158,7 @@ export const AdminErpView: React.FC = () => {
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
           </div>
           <div className="font-extrabold text-sm text-slate-900">
-            Alessandro Manoni (Cod. 3)
+            Davide Ferraresi (Cod. 3)
           </div>
           <p className="text-2xs text-slate-500">
             Accede con permessi RLS ai soli clienti assegnati, crea ordini offline/online, verifica fidi e registra incassi.
@@ -298,7 +298,6 @@ export const AdminErpView: React.FC = () => {
                 className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 font-semibold text-slate-800"
               >
                 <option value="SAP_BUSINESS_ONE">SAP Business One (Service Layer OData)</option>
-                <option value="ZUCCHETTI_AD HOC">Zucchetti Ad Hoc Revolution / Enterprise</option>
                 <option value="GENERIC_REST">Custom ERP Webhook / REST Gateway</option>
               </select>
             </div>

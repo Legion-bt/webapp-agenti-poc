@@ -75,7 +75,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
           <Search className="w-5 h-5 text-slate-400 mr-2.5" />
           <input
             type="text"
-            placeholder="Cerca clienti, articoli, ordini o azioni (es. Rossi, SAGR075)..."
+            placeholder="Cerca clienti, articoli, ordini o azioni (es. Verdemare, SAGR075)..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="w-full text-sm bg-transparent outline-hidden text-slate-800 placeholder:text-slate-400 font-medium"
