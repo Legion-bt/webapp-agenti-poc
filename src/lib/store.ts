@@ -35,11 +35,12 @@ import {
   INITIAL_ERP_LOGS,
 } from './mock-data';
 
-// v2: anonymized demo data; drops the copy cached by older versions.
-const STORAGE_KEY = 'agentego_erp_database_v2';
+// v3: fully invented demo data; drops the copies cached by older versions.
+export const STORAGE_KEY = 'agentego_erp_database_v3';
 if (typeof localStorage !== 'undefined') {
   try {
     localStorage.removeItem('agentego_erp_database_v1');
+    localStorage.removeItem('agentego_erp_database_v2');
   } catch {
     /* storage unavailable */
   }
@@ -346,7 +347,7 @@ class Store {
         supabase.from('sales_agents').select('*').order('full_name'),
         supabase.from('customers').select('*').order('business_name'),
         supabase.from('price_lists').select('id, name'),
-        supabase.from('products').select('*'),
+        supabase.from('products').select('*, product_categories(name)'),
       ]);
 
       const firstError = [orgsRes, agentsRes, customersRes].find((r) => r.error)?.error;
@@ -437,7 +438,7 @@ class Store {
         name: sp.name,
         description: sp.description || '',
         categoryId: sp.category_id || '',
-        categoryName: sp.code?.startsWith('OL') ? 'OLIO IMBOTTIGLIATO' : 'DOCG IMBOTTIGLIATI',
+        categoryName: (sp.product_categories?.name || '').toUpperCase(),
         brand: sp.brand || '',
         unit: sp.unit || 'BT',
         packInfo: sp.pack_info || '',
@@ -446,7 +447,8 @@ class Store {
         defaultDiscount1: Number(sp.default_discount1 ?? 0),
         defaultDiscount2: Number(sp.default_discount2 ?? 0),
         defaultDiscount3: Number(sp.default_discount3 ?? 0),
-        imageUrl: sp.image_url || '',
+        // Only bucket paths: external URLs are not allowed (migration 008).
+        imagePath: sp.image_url && !/^https?:/i.test(sp.image_url) ? sp.image_url : '',
         active: sp.active ?? true,
         isPromo: sp.is_promo ?? false,
       }));

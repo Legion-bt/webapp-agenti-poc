@@ -1,5 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw, RotateCcw } from 'lucide-react';
+import { STORAGE_KEY } from '../../lib/store';
 
 interface Props {
   children: ReactNode;
@@ -26,7 +27,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   private handleReset = () => {
     try {
-      localStorage.removeItem('agentego_erp_database_v1');
+      localStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem('agentego_theme');
     } catch (e) {
       console.error(e);

@@ -1,12 +1,17 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { productService } from '../../services/product.service';
+import { productImageService } from '../../services/product-image.service';
 import { Product } from '../../types';
+import { ProductImage } from './ProductImage';
 import {
   ArrowLeft,
   ShoppingCart,
   Building,
   CheckCircle2,
   Calendar,
+  ImagePlus,
+  Trash2,
+  Loader2,
 } from 'lucide-react';
 
 interface ProductDetailViewProps {
@@ -25,6 +30,9 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
   const product = productService.getProductById(productId);
   const warehouseStocks = product ? productService.getStockForProduct(product.id) : [];
   const totalAvailable = product ? productService.getTotalAvailableStock(product.id) : 0;
+  const fileInput = useRef<HTMLInputElement>(null);
+  const [imageBusy, setImageBusy] = useState(false);
+  const [imageError, setImageError] = useState<string | null>(null);
 
   if (!product) {
     return (
@@ -36,6 +44,35 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
       </div>
     );
   }
+
+  const canManageImage = productImageService.canManage(product);
+
+  const handleImageFile = async (file: File | undefined) => {
+    if (!file) return;
+    setImageError(null);
+    setImageBusy(true);
+    try {
+      await productImageService.upload(product, file);
+    } catch (err) {
+      setImageError(err instanceof Error ? err.message : 'Caricamento non riuscito.');
+    } finally {
+      setImageBusy(false);
+      if (fileInput.current) fileInput.current.value = '';
+    }
+  };
+
+  const handleImageRemove = async () => {
+    if (!window.confirm("Rimuovere l'immagine di questo articolo?")) return;
+    setImageError(null);
+    setImageBusy(true);
+    try {
+      await productImageService.remove(product);
+    } catch (err) {
+      setImageError(err instanceof Error ? err.message : 'Rimozione non riuscita.');
+    } finally {
+      setImageBusy(false);
+    }
+  };
 
   const handleAdd = () => {
     if (onAddToCart) {
@@ -68,12 +105,44 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
         {/* Left Column: Image & Basic Info */}
         <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-2xs flex flex-col items-center">
           <div className="w-full h-72 bg-slate-50 rounded-lg flex items-center justify-center p-6 border border-slate-100">
-            <img
-              src={product.imageUrl}
-              alt={product.name}
-              className="max-h-full max-w-full object-contain"
-            />
+            <ProductImage product={product} className="h-full max-h-full max-w-full object-contain" />
           </div>
+
+          {canManageImage && (
+            <div className="w-full mt-3">
+              <input
+                ref={fileInput}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={(e) => handleImageFile(e.target.files?.[0])}
+              />
+              <div className="flex items-center justify-center gap-2">
+                <button
+                  onClick={() => fileInput.current?.click()}
+                  disabled={imageBusy}
+                  className="cursor-pointer inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 disabled:opacity-60 px-3 py-1.5 rounded-lg transition-colors"
+                >
+                  {imageBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ImagePlus className="w-3.5 h-3.5" />}
+                  <span>{product.imagePath ? 'Sostituisci immagine' : 'Carica immagine'}</span>
+                </button>
+                {product.imagePath && (
+                  <button
+                    onClick={handleImageRemove}
+                    disabled={imageBusy}
+                    className="cursor-pointer inline-flex items-center gap-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-60 px-3 py-1.5 rounded-lg transition-colors"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Rimuovi</span>
+                  </button>
+                )}
+              </div>
+              <p className="text-3xs text-slate-400 text-center mt-1.5">
+                JPEG, PNG o WebP fino a 5 MB. Visibile solo agli utenti della webapp.
+              </p>
+              {imageError && <p className="text-2xs text-rose-600 text-center mt-1">{imageError}</p>}
+            </div>
+          )}
 
           <div className="w-full mt-4 text-center">
             <span className="text-2xs font-bold text-blue-600 uppercase tracking-wide">

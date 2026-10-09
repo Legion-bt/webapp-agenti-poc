@@ -278,14 +278,14 @@ INSERT INTO public.organizations (id, code, name, legal_name, vat_number, addres
 VALUES (
     'a0000000-0000-0000-0000-000000000001',
     'ORG-01',
-    'Vigneti & Oliveti Adriatici S.p.A.',
-    'Vigneti & Oliveti Adriatici Società Agricola S.p.A.',
+    'Vigneti & Oliveti di Valdoro S.p.A.',
+    'Vigneti & Oliveti di Valdoro Società Agricola S.p.A.',
     'IT90000000101',
     'Via dell''Artigianato, 42',
-    'Jesi',
-    'AN',
+    'Valdoro',
+    'XA',
     'GENERIC_REST',
-    'https://erp-gateway.example/v2/adriatici',
+    'https://erp-gateway.example/v2/valdoro',
     'CONNECTED'
 ) ON CONFLICT (code) DO NOTHING;
 
@@ -299,7 +299,7 @@ VALUES
     'Davide Ferraresi',
     'agente@example.local',
     '+39 300 0000301',
-    'Pesaro - Urbino & Romagna',
+    'Porto Selene & Rocca Ventosa',
     5.5,
     35000.00,
     420000.00
@@ -311,7 +311,7 @@ VALUES
     'Stefano Valli',
     's.valli@example.local',
     '+39 300 0000302',
-    'Ancona - Macerata',
+    'Fontechiara & Montecerro',
     5.0,
     30000.00,
     360000.00
@@ -332,30 +332,30 @@ INSERT INTO public.customers (
 ) VALUES (
     'd0000000-0000-0000-0000-000000000001',
     'a0000000-0000-0000-0000-000000000001',
-    '000030',
+    '000301',
     'VERDEMARE FORNITURE SPA',
     'IT90000000301',
     '90000000301',
     '0000000',
     'davide.ferraresi@example.local',
     'verdemareforniture@pec.example',
-    '0721 000301',
+    '0000 000301',
     '300 0000311',
     'VIA DEI TIGLI, 12',
-    'BARCHI',
-    'Pesaro Urbino',
-    '61030',
+    'BORGO LUMINA',
+    'XA',
+    '99012',
     'ITALIA',
-    'LOMBARDIA / MARCHE',
+    'VALDORO NORD',
     'b0000000-0000-0000-0000-000000000001',
     'c0000000-0000-0000-0000-000000000001',
     'Bonifico bancario 30 - 60 - 90 gg. d.f.',
     'IT00X0000000000000000000301',
-    'MONTE DEI PASCHI DI SIENA',
+    'BANCA DEL TERRITORIO VALDORESE',
     'Chiuso MARTEDI/DOMENICA. Consegna dalle 08:30 alle 12:00 presso magazzino retro.',
-    950000.00,
-    929762.68,
-    811008.82,
+    180000.00,
+    176420.50,
+    92415.30,
     'BLOCKED',
     'HOTEL 3-4'
 ) ON CONFLICT (org_id, code) DO NOTHING;
@@ -363,22 +363,22 @@ INSERT INTO public.customers (
 -- 5. Partite Aperte e Sospesi (Screenshot 3)
 INSERT INTO public.customer_suspended_items (customer_id, doc_number, internal_ref, doc_date, doc_type, match_title, due_date, balance, amount, to_collect, is_paid)
 VALUES 
-('d0000000-0000-0000-0000-000000000001', '2006-RFN-0000079', '470\1', '2006-11-18', 'BON', 'Ns. Fattura RB30: R.B. 30 gg. d.f.', '2006-11-16', 83.57, 83.57, 0.00, false),
-('d0000000-0000-0000-0000-000000000001', '2006-RFN-0000070', '460\1', '2006-11-09', 'RB', 'Ns. Fattura RB30: R.B. 30 gg. d.f.', '2006-12-09', 86400.00, 86400.00, 73400.00, false),
-('d0000000-0000-0000-0000-000000000001', '2006-RFN-0000079', '476\1', '2006-12-19', 'BON', 'Ns. Fattura', '2006-12-19', 4320.00, 4320.00, 0.00, false),
-('d0000000-0000-0000-0000-000000000001', '2007-RFN-0000013', '478\1', '2007-02-04', 'RB', 'Ns. Fattura RB30: R.B. 30 gg. d.f.', '2007-03-06', 260.00, 360.00, 0.00, false),
-('d0000000-0000-0000-0000-000000000001', '2007-RFN-0000017', '485\1', '2007-02-15', 'RB', 'Ns. Fattura RB30: R.B. 30 gg. d.f.', '2007-03-17', 360.00, 360.00, 0.00, false),
-('d0000000-0000-0000-0000-000000000001', '2007-RFN-0000018', '486\1', '2007-02-15', 'RB', 'Ns. Fattura RB30: R.B. 30 gg. d.f.', '2007-03-17', 144.00, 144.00, 0.00, false),
-('d0000000-0000-0000-0000-000000000001', '2007-RFN-0000006', '490\1', '2007-01-25', 'RD', 'Ns. Fattura RD45F: RIMESSA DIRETTA 45 GG D.F.F.M.', '2007-03-31', 76080.00, 76080.00, 0.00, false),
-('d0000000-0000-0000-0000-000000000001', '2007-RFN-0000012', '562\1', '2007-02-04', 'RB', 'Fattura di Vendita RB30F: R.B. 30 gg. d.f.f.m.', '2007-03-31', 360.00, 360.00, 0.00, false),
-('d0000000-0000-0000-0000-000000000001', '2007-RFN-0000023', '503\1', '2007-03-07', 'RB', 'Ns. Fattura RB30: R.B. 30 gg. d.f.', '2007-04-06', 2664.00, 2664.00, 0.00, false);
+('d0000000-0000-0000-0000-000000000001', '2024-FT-0000079', '771\1', '2024-11-18', 'BON', 'Ns. Fattura RB30: R.B. 30 gg. d.f.', '2024-11-16', 47.20, 47.20, 0.00, false),
+('d0000000-0000-0000-0000-000000000001', '2024-FT-0000070', '761\1', '2024-11-09', 'RB', 'Ns. Fattura RB30: R.B. 30 gg. d.f.', '2024-12-09', 31250.00, 31250.00, 26800.00, false),
+('d0000000-0000-0000-0000-000000000001', '2024-FT-0000079', '777\1', '2024-12-19', 'BON', 'Ns. Fattura', '2024-12-19', 1580.00, 1580.00, 0.00, false),
+('d0000000-0000-0000-0000-000000000001', '2025-FT-0000013', '779\1', '2025-02-04', 'RB', 'Ns. Fattura RB30: R.B. 30 gg. d.f.', '2025-03-06', 210.00, 290.00, 0.00, false),
+('d0000000-0000-0000-0000-000000000001', '2025-FT-0000017', '786\1', '2025-02-15', 'RB', 'Ns. Fattura RB30: R.B. 30 gg. d.f.', '2025-03-17', 290.00, 290.00, 0.00, false),
+('d0000000-0000-0000-0000-000000000001', '2025-FT-0000018', '787\1', '2025-02-15', 'RB', 'Ns. Fattura RB30: R.B. 30 gg. d.f.', '2025-03-17', 96.00, 96.00, 0.00, false),
+('d0000000-0000-0000-0000-000000000001', '2025-FT-0000006', '791\1', '2025-01-25', 'RD', 'Ns. Fattura RD45F: RIMESSA DIRETTA 45 GG D.F.F.M.', '2025-03-31', 28940.00, 28940.00, 0.00, false),
+('d0000000-0000-0000-0000-000000000001', '2025-FT-0000012', '863\1', '2025-02-04', 'RB', 'Fattura di Vendita RB30F: R.B. 30 gg. d.f.f.m.', '2025-03-31', 290.00, 290.00, 0.00, false),
+('d0000000-0000-0000-0000-000000000001', '2025-FT-0000023', '804\1', '2025-03-07', 'RB', 'Ns. Fattura RB30: R.B. 30 gg. d.f.', '2025-04-06', 985.00, 985.00, 0.00, false);
 
 -- 6. Categorie Prodotti
 INSERT INTO public.product_categories (id, code, name)
 VALUES 
 ('e0000000-0000-0000-0000-000000000001', 'OLIO', 'Olio Imbottigliato & Frantoio'),
-('e0000000-0000-0000-0000-000000000002', 'DOCG', 'DOCG Imbottigliati'),
-('e0000000-0000-0000-0000-000000000003', 'DOC', 'DOC Selezione')
+('e0000000-0000-0000-0000-000000000002', 'RISERVA', 'Vini Rossi Riserva'),
+('e0000000-0000-0000-0000-000000000003', 'SELEZIONE', 'Vini Selezione')
 ON CONFLICT (code) DO NOTHING;
 
 -- 7. Prodotti a Catalogo (Screenshot 4)
@@ -392,52 +392,52 @@ INSERT INTO public.products (
     'OLEXT075',
     '800123450012',
     'OLIO EXTRAVERGINE D''OLIVA "DEL FRANTOIO" 0,75',
-    'Estratto a freddo da olive Raggia e Leccino marchigiane.',
+    'Estratto a freddo da olive di cultivar del territorio.',
     'e0000000-0000-0000-0000-000000000001',
-    'Frantoio Marchigiano',
+    'Frantoio Valdoro',
     'BT',
     '1 ST x BT',
     24.00,
     11.50,
     50.0,
     0.0,
-    'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500&auto=format&fit=crop&q=80',
+    NULL,
     true
 ),
 (
     'f0000000-0000-0000-0000-000000000002',
     'a0000000-0000-0000-0000-000000000001',
-    'SAGR075',
+    'RRIS075',
     '800123450029',
-    'SAGRANTINO DI MONTEFALCO X 0,75',
-    'DOCG Imbottigliato 2021. 30 mesi di affinamento.',
+    'ROSSO RISERVA "VALDORO" 0,75',
+    'Annata 2021. 30 mesi di affinamento.',
     'e0000000-0000-0000-0000-000000000002',
-    'Tenuta del Monte',
+    'Tenuta Valdoro',
     'BT',
     '12 BT x CA12',
     18.00,
     8.20,
     20.0,
     10.0,
-    'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=500&auto=format&fit=crop&q=80',
+    NULL,
     false
 ),
 (
     'f0000000-0000-0000-0000-000000000003',
     'a0000000-0000-0000-0000-000000000001',
-    'VD5',
+    'BBIB5',
     '800123450036',
-    'VERDICCHIO DEI CASTELLI DI JESI DA LT. 5',
-    'DOC Classico Superiore in Bag in Box / Dama.',
+    'BIANCO FERMO "FONTECHIARA" BAG-IN-BOX LT. 5',
+    'Bianco fermo in Bag in Box / Dama.',
     'e0000000-0000-0000-0000-000000000003',
-    'Cantine Jesine',
+    'Cantina Fontechiara',
     'PZ',
     '1 PZ x PZ',
     8.40,
     4.10,
     10.0,
     5.0,
-    'https://images.unsplash.com/photo-1558001373-a8a25c34e0fd?w=500&auto=format&fit=crop&q=80',
+    NULL,
     false
 ) ON CONFLICT (org_id, code) DO NOTHING;
 

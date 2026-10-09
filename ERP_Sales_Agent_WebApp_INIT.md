@@ -406,7 +406,7 @@ Card/lista cliente:
 
 ```text
 Rossi Srl
-Sassari
+Isola Grande
 
 Fatturato YTD: €84.230
 Ultimo ordine: 18 giorni fa
@@ -580,7 +580,7 @@ Mostrare:
 Esempio:
 
 ```text
-Magazzino Sassari       15
+Magazzino Isola Grande       15
 Magazzino Cagliari       9
 Impegnato               10
 Disponibile             14

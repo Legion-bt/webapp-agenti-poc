@@ -73,7 +73,7 @@ export interface SalesAgent {
 export interface Customer {
   id: string;
   orgId: string;
-  code: string; // e.g. '000030'
+  code: string; // e.g. '000301'
   businessName: string; // e.g. 'VERDEMARE FORNITURE SPA'
   vatNumber: string;
   taxCode: string;
@@ -110,7 +110,7 @@ export interface Customer {
 export interface CustomerSuspendedItem {
   id: string;
   customerId: string;
-  docNumber: string; // e.g. '2026-RFN-0000079'
+  docNumber: string; // e.g. '2025-FT-0000380'
   internalRef: string; // e.g. '470/1'
   docDate: string;
   type: string; // 'BON', 'RB', 'RD'
@@ -132,9 +132,9 @@ export interface ProductCategory {
 export interface Product {
   id: string;
   orgId: string;
-  code: string; // e.g. 'SAGR075'
+  code: string; // e.g. 'RRIS075'
   barcode: string;
-  name: string; // e.g. 'SAGRANTINO DI MONTEFALCO X 0,75'
+  name: string; // e.g. 'ROSSO RISERVA "VALDORO" 0,75'
   description: string;
   categoryId: string;
   categoryName: string;
@@ -146,7 +146,8 @@ export interface Product {
   defaultDiscount1: number;
   defaultDiscount2: number;
   defaultDiscount3: number;
-  imageUrl: string;
+  /** Path in the private "product-images" bucket ('' = no image). */
+  imagePath: string;
   active: boolean;
   isPromo: boolean;
   vintageYear?: string;

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { productService } from '../../services/product.service';
 import { Product } from '../../types';
+import { ProductImage } from './ProductImage';
 import {
   Search,
   ShoppingCart,
@@ -70,7 +71,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({ onNavigate, onAddToCar
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
           <input
             type="text"
-            placeholder="Cerca per denominazione, codice articolo, EAN o brand (es. SAGR075, Olio, Frantoio)..."
+            placeholder="Cerca per denominazione, codice articolo, EAN o brand (es. RRIS075, Olio, Frantoio)..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
@@ -142,10 +143,9 @@ export const CatalogView: React.FC<CatalogViewProps> = ({ onNavigate, onAddToCar
             >
               {/* Image & Promo Badge */}
               <div className="relative h-56 bg-slate-50 flex items-center justify-center p-4 overflow-hidden border-b border-slate-100">
-                <img
-                  src={product.imageUrl}
-                  alt={product.name}
-                  className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
+                <ProductImage
+                  product={product}
+                  className="h-full max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
                 />
 
                 {product.isPromo && (
@@ -174,7 +174,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({ onNavigate, onAddToCar
                     {product.name}
                   </h3>
 
-                  {/* Code & Pack info matching Screenshot 4: Cod: SAGR075 | 12 BT x CA12 */}
+                  {/* Code & Pack info matching Screenshot 4: Cod: RRIS075 | 12 BT x CA12 */}
                   <div className="mt-2 text-2xs text-slate-500 font-mono flex items-center gap-1.5">
                     <span className={`w-2 h-2 rounded-full ${stockDotClass} shrink-0`} />
                     <span className="truncate">

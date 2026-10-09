@@ -97,8 +97,8 @@ export class AnalyticsService {
     // Top Categories
     const topCategories = [
       { name: 'Olio Imbottigliato & Frantoio', total: 42100, percentage: 46 },
-      { name: 'DOCG & Riserve Pregiate', total: 28400, percentage: 31 },
-      { name: 'DOC Selezione & Mescita', total: 14200, percentage: 15 },
+      { name: 'Rossi Riserva & Selezioni', total: 28400, percentage: 31 },
+      { name: 'Vini Selezione & Mescita', total: 14200, percentage: 15 },
       { name: 'Aceti & Gourmet', total: 7300, percentage: 8 },
     ];
 

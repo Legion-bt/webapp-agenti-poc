@@ -26,7 +26,7 @@ La specifica chiede TanStack Start + TanStack Router/Query + Radix/shadcn + reac
 - **Nessun router**: la navigazione è uno `useState` in `src/App.tsx` (`currentView` +
   `selectedEntityId`), quindi niente URL per le pagine.
 - **Dati in memoria**: `src/lib/store.ts` è uno store globale (pattern subscribe) inizializzato
-  da `src/lib/mock-data.ts` e persistito in `localStorage` (`agentego_erp_database_v2`).
+  da `src/lib/mock-data.ts` e persistito in `localStorage` (`agentego_erp_database_v3`; alzare la versione quando cambiano i dati demo).
   I service in `src/services/*.service.ts` leggono e scrivono lo store, **non Supabase**.
 - **Supabase è usato solo per**: login email/password (`store.loginWithSupabase`), lettura di
   `profiles` / `sales_agents` per il ruolo, test di connessione in `AdminErpView`.
@@ -68,8 +68,14 @@ al posto dello store locale.
   dal dashboard (Via Editor, Verify JWT disattivato): dopo ogni modifica va ripubblicata a mano.
 - `005` (ordini: order_items, RPC `create_order`, numerazione lato server): ordini letti e scritti
   su Supabase da `order.service.ts` / `store.syncOrders()`. Provvigioni, giacenze, preventivi e
-  visite restano dati demo locali. `005` e `006` applicate; `007` (anonimizzazione dati demo) da applicare.
-- **Dati demo solo inventati**: niente nomi di persone o aziende reali, né marchi di gestionali
+  visite restano dati demo locali. `005` e `006` applicate; `007` (anonimizzazione dati demo) e `008` (bucket privato
+  `product-images`, RPC `set_product_image`) da applicare.
+- Immagini articoli: solo nel bucket privato `product-images` (path in `products.image_url`,
+  URL firmati da `product-image.service.ts`); senza immagine si mostra un'illustrazione
+  disegnata in `ProductImage.tsx`. Niente immagini, font o altre risorse da URL esterni
+  (i font sono pacchetti `@fontsource`).
+- **Dati demo solo inventati**: niente nomi di persone, aziende, luoghi (località e sigle provincia
+  fittizie XA–XE, CAP 99xxx), banche, denominazioni di vini o documenti reali, né marchi di gestionali
   (l'export di AI Studio li conteneva ed è stato ripulito). Gli unici dati reali sono gli utenti
   di login creati dall'utente: non modificarli.
   La Edge Function è esclusa dal `tsc` del progetto (è codice Deno).

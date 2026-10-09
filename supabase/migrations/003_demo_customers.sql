@@ -4,31 +4,31 @@
 -- Da eseguire nel SQL Editor DOPO la 002. Rieseguibile: non duplica le righe.
 --
 -- Risultato:
---   ORG-01 Vigneti & Oliveti Adriatici     agente 3 Davide Ferraresi  -> 4 clienti
+--   ORG-01 Vigneti & Oliveti di Valdoro     agente 3 Davide Ferraresi  -> 4 clienti
 --                                          agente 7 Giulia Bianchi     -> 3 clienti
---   ORG-02 Poderi delle Colline Toscane    agente 2 Marco Conti        -> 3 clienti
+--   ORG-02 Poderi di Collemiro    agente 2 Marco Conti        -> 3 clienti
 -- Le email degli agenti sono segnaposto: set_user_role(..., p_agent_code => '...')
 -- le sostituisce con quella dell'utente di login.
 -- =============================================================================
 
 -- Organizzazione 2 -------------------------------------------------------------
 INSERT INTO public.organizations (id, code, name, legal_name, vat_number, address, city, province, erp_connector_type, erp_status)
-VALUES ('a0000000-0000-0000-0000-000000000002', 'ORG-02', 'Poderi delle Colline Toscane',
-        'Poderi delle Colline Toscane S.r.l.', 'IT90000000102', 'Via Chiantigiana, 112', 'Greve in Chianti', 'FI',
+VALUES ('a0000000-0000-0000-0000-000000000002', 'ORG-02', 'Poderi di Collemiro',
+        'Poderi di Collemiro S.r.l.', 'IT90000000102', 'Via dei Vigneti, 112', 'Collemiro', 'XD',
         'GENERIC_REST', 'CONNECTED')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.price_lists (id, org_id, code, name)
-VALUES ('c0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000002', '02_001', '02_001 Listino Toscana 2026')
+VALUES ('c0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000002', '02_001', '02_001 Listino Collemiro 2026')
 ON CONFLICT (id) DO NOTHING;
 
 -- Agenti -------------------------------------------------------------------------
 INSERT INTO public.sales_agents (id, org_id, code, full_name, email, phone, area, commission_rate, monthly_target, yearly_target)
 VALUES
     ('b0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000001', '7', 'Giulia Bianchi',
-     'giulia.bianchi@example.local', '+39 300 0000304', 'Ancona & Macerata', 5.00, 30000, 360000),
+     'giulia.bianchi@example.local', '+39 300 0000304', 'Fontechiara & Montecerro', 5.00, 30000, 360000),
     ('b0000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000002', '2', 'Marco Conti',
-     'marco.conti@example.local', '+39 300 0000305', 'Firenze & Siena', 6.00, 40000, 480000)
+     'marco.conti@example.local', '+39 300 0000305', 'Collemiro & Monteluna', 6.00, 40000, 480000)
 ON CONFLICT (id) DO NOTHING;
 
 -- Clienti ------------------------------------------------------------------------
@@ -39,61 +39,61 @@ INSERT INTO public.customers (
 ) VALUES
     -- ORG-01 · Davide Ferraresi (agente 3)
     ('d0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000001', '000031',
-     'HOTEL ONDA AZZURRA SRL', 'IT90000000311', '90000000311', 'amministrazione@ondaazzurra.example', '0721 000311',
-     'Viale Trieste, 210', 'Pesaro', 'PU', '61121', 'Pesaro - Urbino & Romagna',
+     'HOTEL ONDA AZZURRA SRL', 'IT90000000311', '90000000311', 'amministrazione@ondaazzurra.example', '0000 000311',
+     'Viale delle Palme, 210', 'Porto Selene', 'XB', '99020', 'Porto Selene & Rocca Ventosa',
      'b0000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001',
-     'Ri.Ba. 60 gg. d.f.', 'BANCA DI PESARO', 'Consegna ingresso fornitori lato mare, 7:00-10:30.',
+     'Ri.Ba. 60 gg. d.f.', 'BANCA DI ROCCA VENTOSA', 'Consegna ingresso fornitori lato mare, 7:00-10:30.',
      60000, 18450.00, 0, 'ACTIVE', 'HOTEL 3-4'),
     ('d0000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000001', '000032',
-     'RISTORANTE LE TRE VELE SNC', 'IT90000000312', '90000000312', 'info@trevele.example', '0541 000312',
-     'Lungomare Murri, 15', 'Rimini', 'RN', '47921', 'Pesaro - Urbino & Romagna',
+     'RISTORANTE LE TRE VELE SNC', 'IT90000000312', '90000000312', 'info@trevele.example', '0000 000312',
+     'Lungomare delle Vele, 15', 'Torre Marina', 'XB', '99027', 'Porto Selene & Rocca Ventosa',
      'b0000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001',
-     'Bonifico bancario 30 gg. d.f.', 'CREDIT AGRICOLE', 'Chiuso il lunedì.',
+     'Bonifico bancario 30 gg. d.f.', 'BANCA DI TORRE MARINA', 'Chiuso il lunedì.',
      25000, 9870.50, 2150.00, 'ACTIVE', 'RISTORANTE'),
     ('d0000000-0000-0000-0000-000000000004', 'a0000000-0000-0000-0000-000000000001', '000033',
-     'ENOTECA DEL DUCA SRL', 'IT90000000313', '90000000313', 'enotecadelduca@example.local', '0722 000313',
-     'Via Raffaello, 44', 'Urbino', 'PU', '61029', 'Pesaro - Urbino & Romagna',
+     'ENOTECA DEL DUCA SRL', 'IT90000000313', '90000000313', 'enotecadelduca@example.local', '0000 000313',
+     'Via dei Pittori, 44', 'Rocca Ventosa', 'XB', '99023', 'Porto Selene & Rocca Ventosa',
      'b0000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001',
-     'Rimessa diretta', 'BPER BANCA', NULL,
+     'Rimessa diretta', 'CREDITO COOPERATIVO DI FONTECHIARA', NULL,
      15000, 0, 0, 'POTENTIAL', 'ENOTECA'),
 
     -- ORG-01 · Giulia Bianchi (agente 7)
     ('d0000000-0000-0000-0000-000000000005', 'a0000000-0000-0000-0000-000000000001', '000040',
-     'GRAND HOTEL SCOGLIERA SPA', 'IT90000000314', '90000000314', 'acquisti@scogliera.example', '071 000314',
-     'Via Thaon de Revel, 1', 'Ancona', 'AN', '60124', 'Ancona & Macerata',
+     'GRAND HOTEL SCOGLIERA SPA', 'IT90000000314', '90000000314', 'acquisti@scogliera.example', '0000 000314',
+     'Via della Scogliera, 1', 'Fontechiara', 'XC', '99030', 'Fontechiara & Montecerro',
      'b0000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000001',
-     'Bonifico bancario 60 - 90 gg. d.f.', 'INTESA SANPAOLO', 'Scarico da rampa interrata.',
+     'Bonifico bancario 60 - 90 gg. d.f.', 'CASSA DI RISPARMIO DI PORTO SELENE', 'Scarico da rampa interrata.',
      120000, 64300.00, 0, 'ACTIVE', 'HOTEL 5'),
     ('d0000000-0000-0000-0000-000000000006', 'a0000000-0000-0000-0000-000000000001', '000041',
-     'TRATTORIA IL MULINO SNC', 'IT90000000315', '90000000315', 'trattoriamulino@example.local', '0733 000315',
-     'Corso Cavour, 87', 'Macerata', 'MC', '62100', 'Ancona & Macerata',
+     'TRATTORIA IL MULINO SNC', 'IT90000000315', '90000000315', 'trattoriamulino@example.local', '0000 000315',
+     'Corso del Mulino, 87', 'Montecerro', 'XC', '99032', 'Fontechiara & Montecerro',
      'b0000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000001',
-     'Ri.Ba. 30 gg. d.f.', 'BANCA MACERATA', NULL,
+     'Ri.Ba. 30 gg. d.f.', 'BANCA DI MONTECERRO', NULL,
      12000, 11650.00, 4800.00, 'BLOCKED', 'RISTORANTE'),
     ('d0000000-0000-0000-0000-000000000007', 'a0000000-0000-0000-0000-000000000001', '000042',
-     'BOTTEGA DEI SAPORI SRL', 'IT90000000316', '90000000316', 'ordini@bottegasapori.example', '071 000316',
-     'Piazza Roma, 3', 'Sirolo', 'AN', '60020', 'Ancona & Macerata',
+     'BOTTEGA DEI SAPORI SRL', 'IT90000000316', '90000000316', 'ordini@bottegasapori.example', '0000 000316',
+     'Piazza del Borgo, 3', 'Punta Corallo', 'XC', '99034', 'Fontechiara & Montecerro',
      'b0000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000001',
-     'Bonifico bancario 30 gg. d.f.', 'UNICREDIT', 'Stagionale: aperto aprile-ottobre.',
+     'Bonifico bancario 30 gg. d.f.', 'BANCA DI PUNTA CORALLO', 'Stagionale: aperto aprile-ottobre.',
      30000, 7420.00, 0, 'ACTIVE', 'GASTRONOMIA'),
 
     -- ORG-02 · Marco Conti (agente 2)
     ('d0000000-0000-0000-0000-000000000008', 'a0000000-0000-0000-0000-000000000002', '100001',
-     'OSTERIA DEL VICOLO SRL', 'IT90000000317', '90000000317', 'amministrazione@vicolo.example', '055 000317',
-     'Via Porta Rossa, 24', 'Firenze', 'FI', '50123', 'Firenze & Siena',
+     'OSTERIA DEL VICOLO SRL', 'IT90000000317', '90000000317', 'amministrazione@vicolo.example', '0000 000317',
+     'Via del Vicolo Stretto, 24', 'Collemiro', 'XD', '99050', 'Collemiro & Monteluna',
      'b0000000-0000-0000-0000-000000000003', 'c0000000-0000-0000-0000-000000000002',
-     'Bonifico bancario 30 - 60 gg. d.f.', 'BANCA CR FIRENZE', 'ZTL: consegna entro le 9:30.',
+     'Bonifico bancario 30 - 60 gg. d.f.', 'CASSA DI RISPARMIO DI COLLEMIRO', 'ZTL: consegna entro le 9:30.',
      40000, 15200.00, 0, 'ACTIVE', 'RISTORANTE'),
     ('d0000000-0000-0000-0000-000000000009', 'a0000000-0000-0000-0000-000000000002', '100002',
-     'RELAIS POGGIO ALTO', 'IT90000000318', '90000000318', 'booking@poggioalto.example', '0577 000318',
-     'Strada di Leonina, 9', 'Asciano', 'SI', '53041', 'Firenze & Siena',
+     'RELAIS POGGIO ALTO', 'IT90000000318', '90000000318', 'booking@poggioalto.example', '0000 000318',
+     'Strada del Poggio, 9', 'Monteluna', 'XD', '99055', 'Collemiro & Monteluna',
      'b0000000-0000-0000-0000-000000000003', 'c0000000-0000-0000-0000-000000000002',
-     'Ri.Ba. 90 gg. d.f.', 'MONTE DEI PASCHI DI SIENA', 'Strada bianca: preavvisare consegna con furgoni grandi.',
+     'Ri.Ba. 90 gg. d.f.', 'BANCA DEL TERRITORIO VALDORESE', 'Strada bianca: preavvisare consegna con furgoni grandi.',
      80000, 52300.00, 8900.00, 'ACTIVE', 'HOTEL 5'),
     ('d0000000-0000-0000-0000-000000000010', 'a0000000-0000-0000-0000-000000000002', '100003',
-     'ALIMENTARI LA DISPENSA', 'IT90000000319', '90000000319', 'ladispensa@example.local', '055 000319',
-     'Piazza Matteotti, 18', 'Greve in Chianti', 'FI', '50022', 'Firenze & Siena',
+     'ALIMENTARI LA DISPENSA', 'IT90000000319', '90000000319', 'ladispensa@example.local', '0000 000319',
+     'Piazza del Mercato, 18', 'Poggio ai Mandorli', 'XD', '99052', 'Collemiro & Monteluna',
      'b0000000-0000-0000-0000-000000000003', 'c0000000-0000-0000-0000-000000000002',
-     'Rimessa diretta', 'CHIANTIBANCA', NULL,
+     'Rimessa diretta', 'BANCA DEI POGGI', NULL,
      10000, 1240.00, 0, 'ACTIVE', 'GASTRONOMIA')
 ON CONFLICT (id) DO NOTHING;
