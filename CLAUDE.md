@@ -68,8 +68,8 @@ al posto dello store locale.
   dal dashboard (Via Editor, Verify JWT disattivato): dopo ogni modifica va ripubblicata a mano.
 - `005` (ordini: order_items, RPC `create_order`, numerazione lato server): ordini letti e scritti
   su Supabase da `order.service.ts` / `store.syncOrders()`. Provvigioni, giacenze, preventivi e
-  visite restano dati demo locali. `005` e `006` applicate; `007` (anonimizzazione dati demo) e `008` (bucket privato
-  `product-images`, RPC `set_product_image`) da applicare.
+  visite restano dati demo locali. `005`, `006`, `007` (anonimizzazione dati demo) e `008` (bucket privato
+  `product-images`, RPC `set_product_image`) applicate.
 - Immagini articoli: solo nel bucket privato `product-images` (path in `products.image_url`,
   URL firmati da `product-image.service.ts`); senza immagine si mostra un'illustrazione
   disegnata in `ProductImage.tsx`. Niente immagini, font o altre risorse da URL esterni
